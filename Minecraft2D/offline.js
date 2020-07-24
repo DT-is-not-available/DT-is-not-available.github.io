@@ -1,0 +1,33 @@
+﻿{
+	"version": 1595615686,
+	"fileList": [
+		"data.js",
+		"c2runtime.js",
+		"jquery-3.4.1.min.js",
+		"offlineClient.js",
+		"images/canvas.png",
+		"images/player-sheet0.png",
+		"images/player-sheet1.png",
+		"images/cursor-sheet0.png",
+		"images/cursor-sheet1.png",
+		"images/hp.png",
+		"images/hpbg.png",
+		"images/hotbar-sheet0.png",
+		"images/hotbaritem.png",
+		"images/selectionparticle-sheet0.png",
+		"images/button.png",
+		"images/mojangles.png",
+		"images/bg-sheet0.png",
+		"images/title-sheet0.png",
+		"images/minecrafttitle-sheet0.png",
+		"images/chunk.png",
+		"images/scrollto-sheet0.png",
+		"images/inventory.png",
+		"icon-16.png",
+		"loading-logo.png",
+		"icon-32.png",
+		"icon-114.png",
+		"icon-128.png",
+		"icon-256.png"
+	]
+}
