@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1595615686,
+	"version": 1596479846,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -17,12 +17,14 @@
 		"images/selectionparticle-sheet0.png",
 		"images/button.png",
 		"images/mojangles.png",
-		"images/bg-sheet0.png",
 		"images/title-sheet0.png",
 		"images/minecrafttitle-sheet0.png",
 		"images/chunk.png",
 		"images/scrollto-sheet0.png",
 		"images/inventory.png",
+		"images/deathgradient-sheet0.png",
+		"images/mobtest-sheet0.png",
+		"images/bg.png",
 		"icon-16.png",
 		"loading-logo.png",
 		"icon-32.png",
