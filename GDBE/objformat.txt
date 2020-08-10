@@ -1,0 +1,3 @@
+saveString&Obj.collision&","&Obj.jpower&","&Obj.X&","&Obj.Y&","&Obj.TileAt(0,0)&";"
+
+solid,0,240,240,5;
