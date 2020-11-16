@@ -1,3 +1,0 @@
-Simply install https://github.com/tapio/live-server and do
-live-server --watch=js/pathfinder.js
-in cmd.
