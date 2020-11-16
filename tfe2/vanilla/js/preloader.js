@@ -1,11 +1,4 @@
-window.gamePreloads = ["js/steam_helpers.js"];
-window.gamePreloadsBefore = ["js/node_helpers.js"];
-
-var greenworks = require("../greenworks");
-
-if (greenworks.restartAppIfNecessary(1180130)) {
-    window.close();
-} else greenworks.init();if (window.gamePreloads == undefined) window.gamePreloads = [];
+if (window.gamePreloads == undefined) window.gamePreloads = [];
 if (window.gamePreloadsBefore == undefined) window.gamePreloadsBefore = [];
 if (window.useGamePack) {
     window.gamePreloads.push("js/jspack.js");
