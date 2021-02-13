@@ -1,9 +1,9 @@
 ﻿{
-	"version": 1612993324,
+	"version": 1613235496,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
-		"jquery-2.1.1.min.js",
+		"jquery-3.4.1.min.js",
 		"offlineClient.js",
 		"images/collision.png",
 		"images/player-sheet0.png",
@@ -11,6 +11,8 @@
 		"images/baddie-sheet1.png",
 		"images/spawner-sheet0.png",
 		"images/texture.png",
+		"images/baddiebaddiehitbox-sheet0.png",
+		"images/enemytileset.png",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",
