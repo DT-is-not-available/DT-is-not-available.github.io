@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1613235496,
+	"version": 1613340995,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -13,6 +13,7 @@
 		"images/texture.png",
 		"images/baddiebaddiehitbox-sheet0.png",
 		"images/enemytileset.png",
+		"images/sprites.png",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",
