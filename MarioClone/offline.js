@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1613438252,
+	"version": 1614796244,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -15,6 +15,13 @@
 		"images/enemytileset.png",
 		"images/sprites.png",
 		"images/pipeexit.png",
+		"images/grid.png",
+		"images/ui.png",
+		"images/hitboxrender.png",
+		"images/text.png",
+		"images/editorui.png",
+		"images/title-sheet0.png",
+		"images/dialougebox.png",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",

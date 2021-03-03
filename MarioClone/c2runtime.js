@@ -15218,6 +15218,125 @@ cr.system_object.prototype.loadFromJSON = function (o)
 	};
 })();
 cr.shaders = {};
+cr.shaders["hsladjust"] = {src: ["varying mediump vec2 vTex;",
+"uniform lowp sampler2D samplerFront;",
+"precision mediump float;",
+"uniform float huerotate;",
+"uniform float satadjust;",
+"uniform float lumadjust;",
+"vec3 rgb_to_hsl(vec3 color)",
+"{",
+"vec3 hsl = vec3(0.0, 0.0, 0.0);",
+"float fmin = min(min(color.r, color.g), color.b);",
+"float fmax = max(max(color.r, color.g), color.b);",
+"float delta = fmax - fmin;",
+"hsl.z = (fmax + fmin) / 2.0;",
+"if (delta == 0.0)",
+"{",
+"hsl.x = 0.0;",
+"hsl.y = 0.0;",
+"}",
+"else",
+"{",
+"if (hsl.z < 0.5)",
+"hsl.y = delta / (fmax + fmin);",
+"else",
+"hsl.y = delta / (2.0 - fmax - fmin);",
+"float dR = (((fmax - color.r) / 6.0) + (delta / 2.0)) / delta;",
+"float dG = (((fmax - color.g) / 6.0) + (delta / 2.0)) / delta;",
+"float dB = (((fmax - color.b) / 6.0) + (delta / 2.0)) / delta;",
+"if (color.r == fmax)",
+"hsl.x = dB - dG;",
+"else if (color.g == fmax)",
+"hsl.x = (1.0 / 3.0) + dR - dB;",
+"else if (color.b == fmax)",
+"hsl.x = (2.0 / 3.0) + dG - dR;",
+"if (hsl.x < 0.0)",
+"hsl.x += 1.0;",
+"else if (hsl.x > 1.0)",
+"hsl.x -= 1.0;",
+"}",
+"return hsl;",
+"}",
+"float hue_to_rgb(float f1, float f2, float hue)",
+"{",
+"if (hue < 0.0)",
+"hue += 1.0;",
+"else if (hue > 1.0)",
+"hue -= 1.0;",
+"float ret;",
+"if ((6.0 * hue) < 1.0)",
+"ret = f1 + (f2 - f1) * 6.0 * hue;",
+"else if ((2.0 * hue) < 1.0)",
+"ret = f2;",
+"else if ((3.0 * hue) < 2.0)",
+"ret = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;",
+"else",
+"ret = f1;",
+"return ret;",
+"}",
+"vec3 hsl_to_rgb(vec3 hsl)",
+"{",
+"vec3 rgb = vec3(hsl.z);",
+"if (hsl.y != 0.0)",
+"{",
+"float f2;",
+"if (hsl.z < 0.5)",
+"f2 = hsl.z * (1.0 + hsl.y);",
+"else",
+"f2 = (hsl.z + hsl.y) - (hsl.y * hsl.z);",
+"float f1 = 2.0 * hsl.z - f2;",
+"rgb.r = hue_to_rgb(f1, f2, hsl.x + (1.0 / 3.0));",
+"rgb.g = hue_to_rgb(f1, f2, hsl.x);",
+"rgb.b = hue_to_rgb(f1, f2, hsl.x - (1.0 / 3.0));",
+"}",
+"return rgb;",
+"}",
+"void main(void)",
+"{",
+"vec4 front = texture2D(samplerFront, vTex);",
+"vec3 rgb = rgb_to_hsl(front.rgb) + vec3(huerotate, 0, (lumadjust - 1.0) * front.a);",
+"rgb.y *= satadjust;",
+"rgb = hsl_to_rgb(rgb);",
+"gl_FragColor = vec4(rgb, front.a);",
+"}"
+].join("\n"),
+	extendBoxHorizontal: 0,
+	extendBoxVertical: 0,
+	crossSampling: false,
+	preservesOpaqueness: true,
+	animated: false,
+	parameters: [["huerotate", 0, 1], ["satadjust", 0, 1], ["lumadjust", 0, 1]] }
+cr.shaders["replacecolor"] = {src: ["varying mediump vec2 vTex;",
+"uniform lowp sampler2D samplerFront;",
+"uniform mediump float rsource;",
+"uniform mediump float gsource;",
+"uniform mediump float bsource;",
+"uniform mediump float rdest;",
+"uniform mediump float gdest;",
+"uniform mediump float bdest;",
+"uniform lowp float tolerance;",
+"void main(void)",
+"{",
+"lowp vec4 front = texture2D(samplerFront, vTex);",
+"lowp float a = front.a;",
+"if (a != 0.0)",
+"front.rgb /= a;",
+"lowp float diff = length(front.rgb - vec3(rsource, gsource, bsource) / 255.0);",
+"if (diff <= tolerance)",
+"{",
+"front.rgb = mix(front.rgb, vec3(rdest, gdest, bdest) / 255.0, 1.0 - diff / tolerance);",
+"}",
+"front.rgb *= a;",
+"gl_FragColor = front;",
+"}"
+].join("\n"),
+	extendBoxHorizontal: 0,
+	extendBoxVertical: 0,
+	crossSampling: false,
+	preservesOpaqueness: true,
+	animated: false,
+	parameters: [["rsource", 0, 0], ["gsource", 0, 0], ["bsource", 0, 0], ["rdest", 0, 0], ["gdest", 0, 0], ["bdest", 0, 0], ["tolerance", 0, 1]] }
 ;
 ;
 cr.plugins_.Audio = function(runtime)
@@ -19401,6 +19520,188 @@ cr.plugins_.Button = function(runtime)
 }());
 ;
 ;
+cr.plugins_.Dictionary = function(runtime)
+{
+	this.runtime = runtime;
+};
+(function ()
+{
+	var pluginProto = cr.plugins_.Dictionary.prototype;
+	pluginProto.Type = function(plugin)
+	{
+		this.plugin = plugin;
+		this.runtime = plugin.runtime;
+	};
+	var typeProto = pluginProto.Type.prototype;
+	typeProto.onCreate = function()
+	{
+	};
+	pluginProto.Instance = function(type)
+	{
+		this.type = type;
+		this.runtime = type.runtime;
+	};
+	var instanceProto = pluginProto.Instance.prototype;
+	instanceProto.onCreate = function()
+	{
+		this.dictionary = {};
+		this.cur_key = "";		// current key in for-each loop
+		this.key_count = 0;
+	};
+	instanceProto.saveToJSON = function ()
+	{
+		return this.dictionary;
+	};
+	instanceProto.loadFromJSON = function (o)
+	{
+		this.dictionary = o;
+		this.key_count = 0;
+		for (var p in this.dictionary)
+		{
+			if (this.dictionary.hasOwnProperty(p))
+				this.key_count++;
+		}
+	};
+	function Cnds() {};
+	Cnds.prototype.CompareValue = function (key_, cmp_, value_)
+	{
+		return cr.do_cmp(this.dictionary[key_], cmp_, value_);
+	};
+	Cnds.prototype.ForEachKey = function ()
+	{
+		var current_event = this.runtime.getCurrentEventStack().current_event;
+		for (var p in this.dictionary)
+		{
+			if (this.dictionary.hasOwnProperty(p))
+			{
+				this.cur_key = p;
+				this.runtime.pushCopySol(current_event.solModifiers);
+				current_event.retrigger();
+				this.runtime.popSol(current_event.solModifiers);
+			}
+		}
+		this.cur_key = "";
+		return false;
+	};
+	Cnds.prototype.CompareCurrentValue = function (cmp_, value_)
+	{
+		return cr.do_cmp(this.dictionary[this.cur_key], cmp_, value_);
+	};
+	Cnds.prototype.HasKey = function (key_)
+	{
+		return this.dictionary.hasOwnProperty(key_);
+	};
+	Cnds.prototype.IsEmpty = function ()
+	{
+		return this.key_count === 0;
+	};
+	pluginProto.cnds = new Cnds();
+	function Acts() {};
+	Acts.prototype.AddKey = function (key_, value_)
+	{
+		if (!this.dictionary.hasOwnProperty(key_))
+			this.key_count++;
+		this.dictionary[key_] = value_;
+	};
+	Acts.prototype.SetKey = function (key_, value_)
+	{
+		if (this.dictionary.hasOwnProperty(key_))
+			this.dictionary[key_] = value_;
+	};
+	Acts.prototype.DeleteKey = function (key_)
+	{
+		if (this.dictionary.hasOwnProperty(key_))
+		{
+			delete this.dictionary[key_];
+			this.key_count--;
+		}
+	};
+	Acts.prototype.Clear = function ()
+	{
+		cr.wipe(this.dictionary);		// avoid garbaging
+		this.key_count = 0;
+	};
+	Acts.prototype.JSONLoad = function (json_)
+	{
+		var o;
+		try {
+			o = JSON.parse(json_);
+		}
+		catch(e) { return; }
+		if (!o["c2dictionary"])		// presumably not a c2dictionary object
+			return;
+		this.dictionary = o["data"];
+		this.key_count = 0;
+		for (var p in this.dictionary)
+		{
+			if (this.dictionary.hasOwnProperty(p))
+				this.key_count++;
+		}
+	};
+	Acts.prototype.JSONDownload = function (filename)
+	{
+		var a = document.createElement("a");
+		if (typeof a.download === "undefined")
+		{
+			var str = 'data:text/html,' + encodeURIComponent("<p><a download='data.json' href=\"data:application/json,"
+				+ encodeURIComponent(JSON.stringify({
+						"c2dictionary": true,
+						"data": this.dictionary
+					}))
+				+ "\">Download link</a></p>");
+			window.open(str);
+		}
+		else
+		{
+			var body = document.getElementsByTagName("body")[0];
+			a.textContent = filename;
+			a.href = "data:application/json," + encodeURIComponent(JSON.stringify({
+						"c2dictionary": true,
+						"data": this.dictionary
+					}));
+			a.download = filename;
+			body.appendChild(a);
+			var clickEvent = document.createEvent("MouseEvent");
+			clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			a.dispatchEvent(clickEvent);
+			body.removeChild(a);
+		}
+	};
+	pluginProto.acts = new Acts();
+	function Exps() {};
+	Exps.prototype.Get = function (ret, key_)
+	{
+		if (this.dictionary.hasOwnProperty(key_))
+			ret.set_any(this.dictionary[key_]);
+		else
+			ret.set_int(0);
+	};
+	Exps.prototype.KeyCount = function (ret)
+	{
+		ret.set_int(this.key_count);
+	};
+	Exps.prototype.CurrentKey = function (ret)
+	{
+		ret.set_string(this.cur_key);
+	};
+	Exps.prototype.CurrentValue = function (ret)
+	{
+		if (this.dictionary.hasOwnProperty(this.cur_key))
+			ret.set_any(this.dictionary[this.cur_key]);
+		else
+			ret.set_int(0);
+	};
+	Exps.prototype.AsJSON = function (ret)
+	{
+		ret.set_string(JSON.stringify({
+			"c2dictionary": true,
+			"data": this.dictionary
+		}));
+	};
+	pluginProto.exps = new Exps();
+}());
+;
+;
 cr.plugins_.Function = function(runtime)
 {
 	this.runtime = runtime;
@@ -20107,6 +20408,364 @@ cr.plugins_.Mouse = function(runtime)
 	{
 		ret.set_float(this.mouseYcanvas);
 	};
+	pluginProto.exps = new Exps();
+}());
+;
+;
+cr.plugins_.NinePatch = function(runtime)
+{
+	this.runtime = runtime;
+};
+(function ()
+{
+	var pluginProto = cr.plugins_.NinePatch.prototype;
+	pluginProto.Type = function(plugin)
+	{
+		this.plugin = plugin;
+		this.runtime = plugin.runtime;
+	};
+	var typeProto = pluginProto.Type.prototype;
+	typeProto.onCreate = function()
+	{
+		if (this.is_family)
+			return;
+		this.texture_img = new Image();
+		this.texture_img.cr_filesize = this.texture_filesize;
+		this.runtime.waitForImageLoad(this.texture_img, this.texture_file);
+		this.fillPattern = null;
+		this.leftPattern = null;
+		this.rightPattern = null;
+		this.topPattern = null;
+		this.bottomPattern = null;
+		this.webGL_texture = null;
+		this.webGL_fillTexture = null;
+		this.webGL_leftTexture = null;
+		this.webGL_rightTexture = null;
+		this.webGL_topTexture = null;
+		this.webGL_bottomTexture = null;
+	};
+	typeProto.onLostWebGLContext = function ()
+	{
+		if (this.is_family)
+			return;
+		this.webGL_texture = null;
+		this.webGL_fillTexture = null;
+		this.webGL_leftTexture = null;
+		this.webGL_rightTexture = null;
+		this.webGL_topTexture = null;
+		this.webGL_bottomTexture = null;
+	};
+	typeProto.onRestoreWebGLContext = function ()
+	{
+		if (this.is_family || !this.instances.length)
+			return;
+		if (!this.webGL_texture)
+		{
+			this.webGL_texture = this.runtime.glwrap.loadTexture(this.texture_img, true, this.runtime.linearSampling, this.texture_pixelformat);
+		}
+	};
+	typeProto.unloadTextures = function ()
+	{
+		if (this.is_family || this.instances.length)
+			return;
+		if (this.runtime.glwrap)
+		{
+			this.runtime.glwrap.deleteTexture(this.webGL_texture);
+			this.runtime.glwrap.deleteTexture(this.webGL_fillTexture);
+			this.runtime.glwrap.deleteTexture(this.webGL_leftTexture);
+			this.runtime.glwrap.deleteTexture(this.webGL_rightTexture);
+			this.runtime.glwrap.deleteTexture(this.webGL_topTexture);
+			this.runtime.glwrap.deleteTexture(this.webGL_bottomTexture);
+			this.webGL_texture = null;
+			this.webGL_fillTexture = null;
+			this.webGL_leftTexture = null;
+			this.webGL_rightTexture = null;
+			this.webGL_topTexture = null;
+			this.webGL_bottomTexture = null;
+		}
+	};
+	typeProto.slicePatch = function (x1, y1, x2, y2)
+	{
+		var tmpcanvas = document.createElement("canvas");
+		var w = x2 - x1;
+		var h = y2 - y1;
+		tmpcanvas.width = w;
+		tmpcanvas.height = h;
+		var tmpctx = tmpcanvas.getContext("2d");
+		tmpctx.drawImage(this.texture_img, x1, y1, w, h, 0, 0, w, h);
+		return tmpcanvas;
+	};
+	typeProto.createPatch = function (lm, rm, tm, bm)
+	{
+		var iw = this.texture_img.width;
+		var ih = this.texture_img.height;
+		var re = iw - rm;
+		var be = ih - bm;
+		if (this.runtime.glwrap)
+		{
+			if (this.webGL_fillTexture)
+				return;		// already created
+			var glwrap = this.runtime.glwrap;
+			var ls = this.runtime.linearSampling;
+			var tf = this.texture_pixelformat;
+			if (re > lm && be > tm)
+				this.webGL_fillTexture = glwrap.loadTexture(this.slicePatch(lm, tm, re, be), true, ls, tf);
+			if (lm > 0 && be > tm)
+				this.webGL_leftTexture = glwrap.loadTexture(this.slicePatch(0, tm, lm, be), true, ls, tf, "repeat-y");
+			if (rm > 0 && be > tm)
+				this.webGL_rightTexture = glwrap.loadTexture(this.slicePatch(re, tm, iw, be), true, ls, tf, "repeat-y");
+			if (tm > 0 && re > lm)
+				this.webGL_topTexture = glwrap.loadTexture(this.slicePatch(lm, 0, re, tm), true, ls, tf, "repeat-x");
+			if (bm > 0 && re > lm)
+				this.webGL_bottomTexture = glwrap.loadTexture(this.slicePatch(lm, be, re, ih), true, ls, tf, "repeat-x");
+		}
+		else
+		{
+			if (this.fillPattern)
+				return;		// already created
+			var ctx = this.runtime.ctx;
+			if (re > lm && be > tm)
+				this.fillPattern = ctx.createPattern(this.slicePatch(lm, tm, re, be), "repeat");
+			if (lm > 0 && be > tm)
+				this.leftPattern = ctx.createPattern(this.slicePatch(0, tm, lm, be), "repeat");
+			if (rm > 0 && be > tm)
+				this.rightPattern = ctx.createPattern(this.slicePatch(re, tm, iw, be), "repeat");
+			if (tm > 0 && re > lm)
+				this.topPattern = ctx.createPattern(this.slicePatch(lm, 0, re, tm), "repeat");
+			if (bm > 0 && re > lm)
+				this.bottomPattern = ctx.createPattern(this.slicePatch(lm, be, re, ih), "repeat");
+		}
+	};
+	pluginProto.Instance = function(type)
+	{
+		this.type = type;
+		this.runtime = type.runtime;
+	};
+	var instanceProto = pluginProto.Instance.prototype;
+	instanceProto.onCreate = function()
+	{
+		this.leftMargin = this.properties[0];
+		this.rightMargin = this.properties[1];
+		this.topMargin = this.properties[2];
+		this.bottomMargin = this.properties[3];
+		this.edges = this.properties[4];					// 0=tile, 1=stretch
+		this.fill = this.properties[5];						// 0=tile, 1=stretch, 2=transparent
+		this.visible = (this.properties[6] === 0);			// 0=visible, 1=invisible
+		this.seamless = (this.properties[8] !== 0);			// 1px overdraw to hide seams
+		if (this.recycled)
+			this.rcTex.set(0, 0, 0, 0);
+		else
+			this.rcTex = new cr.rect(0, 0, 0, 0);
+		if (this.runtime.glwrap)
+		{
+			if (!this.type.webGL_texture)
+			{
+				this.type.webGL_texture = this.runtime.glwrap.loadTexture(this.type.texture_img, false, this.runtime.linearSampling, this.type.texture_pixelformat);
+			}
+		}
+		this.type.createPatch(this.leftMargin, this.rightMargin, this.topMargin, this.bottomMargin);
+	};
+	function drawPatternProperly(ctx, pattern, pw, ph, drawX, drawY, w, h, ox, oy)
+	{
+		ctx.save();
+		ctx.fillStyle = pattern;
+		var offX = drawX % pw;
+		var offY = drawY % ph;
+		if (offX < 0)
+			offX += pw;
+		if (offY < 0)
+			offY += ph;
+		ctx.translate(offX + ox, offY + oy);
+		ctx.fillRect(drawX - offX - ox, drawY - offY - oy, w, h);
+		ctx.restore();
+	};
+	instanceProto.draw = function(ctx)
+	{
+		var img = this.type.texture_img;
+		var lm = this.leftMargin;
+		var rm = this.rightMargin;
+		var tm = this.topMargin;
+		var bm = this.bottomMargin;
+		var iw = img.width;
+		var ih = img.height;
+		var re = iw - rm;
+		var be = ih - bm;
+		ctx.globalAlpha = this.opacity;
+		ctx.save();
+		var myx = this.x;
+		var myy = this.y;
+		var myw = this.width;
+		var myh = this.height;
+		if (this.runtime.pixel_rounding)
+		{
+			myx = Math.round(myx);
+			myy = Math.round(myy);
+		}
+		var drawX = -(this.hotspotX * this.width);
+		var drawY = -(this.hotspotY * this.height);
+		var offX = drawX % iw;
+		var offY = drawY % ih;
+		if (offX < 0)
+			offX += iw;
+		if (offY < 0)
+			offY += ih;
+		ctx.translate(myx + offX, myy + offY);
+		var x = drawX - offX;
+		var y = drawY - offY;
+		var s = (this.seamless ? 1 : 0);
+		if (lm > 0 && tm > 0)
+			ctx.drawImage(img, 0, 0, lm + s, tm + s, x, y, lm + s, tm + s);
+		if (rm > 0 && tm > 0)
+			ctx.drawImage(img, re - s, 0, rm + s, tm + s, x + myw - rm - s, y, rm + s, tm + s);
+		if (rm > 0 && bm > 0)
+			ctx.drawImage(img, re - s, be - s, rm + s, bm + s, x + myw - rm - s, y + myh - bm - s, rm + s, bm + s);
+		if (lm > 0 && bm > 0)
+			ctx.drawImage(img, 0, be - s, lm + s, bm + s, x, y + myh - bm - s, lm + s, bm + s);
+		if (this.edges === 0)		// tile edges
+		{
+			var off = (this.fill === 2 ? 0 : s);
+			if (lm > 0 && be > tm)
+				drawPatternProperly(ctx, this.type.leftPattern, lm, be - tm, x, y + tm, lm + off, myh - tm - bm, 0, 0);
+			if (rm > 0 && be > tm)
+				drawPatternProperly(ctx, this.type.rightPattern, rm, be - tm, x + myw - rm - off, y + tm, rm + off, myh - tm - bm, off, 0);
+			if (tm > 0 && re > lm)
+				drawPatternProperly(ctx, this.type.topPattern, re - lm, tm, x + lm, y, myw - lm - rm, tm + off, 0, 0);
+			if (bm > 0 && re > lm)
+				drawPatternProperly(ctx, this.type.bottomPattern, re - lm, bm, x + lm, y + myh - bm - off, myw - lm - rm, bm + off, 0, off);
+		}
+		else if (this.edges === 1)	// stretch edges
+		{
+			if (lm > 0 && be > tm && myh - tm - bm > 0)
+				ctx.drawImage(img, 0, tm, lm, be - tm, x, y + tm, lm, myh - tm - bm);
+			if (rm > 0 && be > tm && myh - tm - bm > 0)
+				ctx.drawImage(img, re, tm, rm, be - tm, x + myw - rm, y + tm, rm, myh - tm - bm);
+			if (tm > 0 && re > lm && myw - lm - rm > 0)
+				ctx.drawImage(img, lm, 0, re - lm, tm, x + lm, y, myw - lm - rm, tm);
+			if (bm > 0 && re > lm && myw - lm - rm > 0)
+				ctx.drawImage(img, lm, be, re - lm, bm, x + lm, y + myh - bm, myw - lm - rm, bm);
+		}
+		if (be > tm && re > lm)
+		{
+			if (this.fill === 0)		// tile fill
+			{
+				drawPatternProperly(ctx, this.type.fillPattern, re - lm, be - tm, x + lm, y + tm, myw - lm - rm, myh - tm - bm, 0, 0);
+			}
+			else if (this.fill === 1)	// stretch fill
+			{
+				if (myw - lm - rm > 0 && myh - tm - bm > 0)
+				{
+					ctx.drawImage(img, lm, tm, re - lm, be - tm, x + lm, y + tm, myw - lm - rm, myh - tm - bm);
+				}
+			}
+		}
+		ctx.restore();
+	};
+	instanceProto.drawPatch = function(glw, tex, sx, sy, sw, sh, dx, dy, dw, dh)
+	{
+		glw.setTexture(tex);
+		var rcTex = this.rcTex;
+		rcTex.left = sx / tex.c2width;
+		rcTex.top = sy / tex.c2height;
+		rcTex.right = (sx + sw) / tex.c2width;
+		rcTex.bottom = (sy + sh) / tex.c2height;
+		glw.quadTex(dx, dy, dx + dw, dy, dx + dw, dy + dh, dx, dy + dh, rcTex);
+	};
+	instanceProto.tilePatch = function(glw, tex, dx, dy, dw, dh, ox, oy)
+	{
+		glw.setTexture(tex);
+		var rcTex = this.rcTex;
+		rcTex.left = -ox / tex.c2width;
+		rcTex.top = -oy / tex.c2height;
+		rcTex.right = (dw - ox) / tex.c2width;
+		rcTex.bottom = (dh - oy) / tex.c2height;
+		glw.quadTex(dx, dy, dx + dw, dy, dx + dw, dy + dh, dx, dy + dh, rcTex);
+	};
+	instanceProto.drawGL_earlyZPass = function(glw)
+	{
+		this.drawGL(glw);
+	};
+	instanceProto.drawGL = function(glw)
+	{
+		var lm = this.leftMargin;
+		var rm = this.rightMargin;
+		var tm = this.topMargin;
+		var bm = this.bottomMargin;
+		var iw = this.type.texture_img.width;
+		var ih = this.type.texture_img.height;
+		var re = iw - rm;
+		var be = ih - bm;
+		glw.setOpacity(this.opacity);
+		var rcTex = this.rcTex;
+		var q = this.bquad;
+		var myx = q.tlx;
+		var myy = q.tly;
+		var myw = this.width;
+		var myh = this.height;
+		if (this.runtime.pixel_rounding)
+		{
+			myx = Math.round(myx);
+			myy = Math.round(myy);
+		}
+		var s = (this.seamless ? 1 : 0);
+		if (lm > 0 && tm > 0)
+			this.drawPatch(glw, this.type.webGL_texture, 0, 0, lm + s, tm + s, myx, myy, lm + s, tm + s);
+		if (rm > 0 && tm > 0)
+			this.drawPatch(glw, this.type.webGL_texture, re - s, 0, rm + s, tm + s, myx + myw - rm - s, myy, rm + s, tm + s);
+		if (rm > 0 && bm > 0)
+			this.drawPatch(glw, this.type.webGL_texture, re - s, be - s, rm + s, bm + s, myx + myw - rm - s, myy + myh - bm - s, rm + s, bm + s);
+		if (lm > 0 && bm > 0)
+			this.drawPatch(glw, this.type.webGL_texture, 0, be - s, lm + s, bm + s, myx, myy + myh - bm - s, lm + s, bm + s);
+		if (this.edges === 0)		// tile edges
+		{
+			var off = (this.fill === 2 ? 0 : s);
+			if (lm > 0 && be > tm)
+				this.tilePatch(glw, this.type.webGL_leftTexture, myx, myy + tm, lm + off, myh - tm - bm, 0, 0);
+			if (rm > 0 && be > tm)
+				this.tilePatch(glw, this.type.webGL_rightTexture, myx + myw - rm - off, myy + tm, rm + off, myh - tm - bm, off, 0);
+			if (tm > 0 && re > lm)
+				this.tilePatch(glw, this.type.webGL_topTexture, myx + lm, myy, myw - lm - rm, tm + off, 0, 0);
+			if (bm > 0 && re > lm)
+				this.tilePatch(glw, this.type.webGL_bottomTexture, myx + lm, myy + myh - bm - off, myw - lm - rm, bm + off, 0, off);
+		}
+		else if (this.edges === 1)	// stretch edges
+		{
+			if (lm > 0 && be > tm)
+				this.drawPatch(glw, this.type.webGL_texture, 0, tm, lm, be - tm, myx, myy + tm, lm, myh - tm - bm);
+			if (rm > 0 && be > tm)
+				this.drawPatch(glw, this.type.webGL_texture, re, tm, rm, be - tm, myx + myw - rm, myy + tm, rm, myh - tm - bm);
+			if (tm > 0 && re > lm)
+				this.drawPatch(glw, this.type.webGL_texture, lm, 0, re - lm, tm, myx + lm, myy, myw - lm - rm, tm);
+			if (bm > 0 && re > lm)
+				this.drawPatch(glw, this.type.webGL_texture, lm, be, re - lm, bm, myx + lm, myy + myh - bm, myw - lm - rm, bm);
+		}
+		if (be > tm && re > lm)
+		{
+			if (this.fill === 0)		// tile fill
+			{
+				this.tilePatch(glw, this.type.webGL_fillTexture, myx + lm, myy + tm, myw - lm - rm, myh - tm - bm, 0, 0);
+			}
+			else if (this.fill === 1)	// stretch fill
+			{
+				this.drawPatch(glw, this.type.webGL_texture, lm, tm, re - lm, be - tm, myx + lm, myy + tm, myw - lm - rm, myh - tm - bm);
+			}
+		}
+	};
+	function Cnds() {};
+	Cnds.prototype.OnURLLoaded = function ()
+	{
+		return true;
+	};
+	pluginProto.cnds = new Cnds();
+	function Acts() {};
+	Acts.prototype.SetEffect = function (effect)
+	{
+		this.blend_mode = effect;
+		this.compositeOp = cr.effectToCompositeOp(effect);
+		cr.setGLBlend(this, effect, this.runtime.gl);
+		this.runtime.redraw = true;
+	};
+	pluginProto.acts = new Acts();
+	function Exps() {};
 	pluginProto.exps = new Exps();
 }());
 ;
@@ -21360,26 +22019,20 @@ cr.plugins_.Sprite = function(runtime)
 	};
 	pluginProto.exps = new Exps();
 }());
+/* global cr,log,assert2 */
+/* jshint globalstrict: true */
+/* jshint strict: true */
 ;
 ;
-cr.plugins_.Text = function(runtime)
+cr.plugins_.Spritefont2 = function(runtime)
 {
 	this.runtime = runtime;
 };
 (function ()
 {
-	var pluginProto = cr.plugins_.Text.prototype;
+	var pluginProto = cr.plugins_.Spritefont2.prototype;
 	pluginProto.onCreate = function ()
 	{
-		pluginProto.acts.SetWidth = function (w)
-		{
-			if (this.width !== w)
-			{
-				this.width = w;
-				this.text_changed = true;	// also recalculate text wrapping
-				this.set_bbox_changed();
-			}
-		};
 	};
 	pluginProto.Type = function(plugin)
 	{
@@ -21389,312 +22042,247 @@ cr.plugins_.Text = function(runtime)
 	var typeProto = pluginProto.Type.prototype;
 	typeProto.onCreate = function()
 	{
+		if (this.is_family)
+			return;
+		this.texture_img = new Image();
+		this.runtime.waitForImageLoad(this.texture_img, this.texture_file);
+		this.webGL_texture = null;
 	};
 	typeProto.onLostWebGLContext = function ()
 	{
 		if (this.is_family)
 			return;
-		var i, len, inst;
-		for (i = 0, len = this.instances.length; i < len; i++)
+		this.webGL_texture = null;
+	};
+	typeProto.onRestoreWebGLContext = function ()
+	{
+		if (this.is_family || !this.instances.length)
+			return;
+		if (!this.webGL_texture)
 		{
-			inst = this.instances[i];
-			inst.mycanvas = null;
-			inst.myctx = null;
-			inst.mytex = null;
+			this.webGL_texture = this.runtime.glwrap.loadTexture(this.texture_img, false, this.runtime.linearSampling, this.texture_pixelformat);
 		}
+		var i, len;
+		for (i = 0, len = this.instances.length; i < len; i++)
+			this.instances[i].webGL_texture = this.webGL_texture;
+	};
+	typeProto.unloadTextures = function ()
+	{
+		if (this.is_family || this.instances.length || !this.webGL_texture)
+			return;
+		this.runtime.glwrap.deleteTexture(this.webGL_texture);
+		this.webGL_texture = null;
+	};
+	typeProto.preloadCanvas2D = function (ctx)
+	{
+		ctx.drawImage(this.texture_img, 0, 0);
 	};
 	pluginProto.Instance = function(type)
 	{
 		this.type = type;
 		this.runtime = type.runtime;
-		if (this.recycled)
-			cr.clearArray(this.lines);
-		else
-			this.lines = [];		// for word wrapping
-		this.text_changed = true;
 	};
 	var instanceProto = pluginProto.Instance.prototype;
-	var requestedWebFonts = {};		// already requested web fonts have an entry here
+	instanceProto.onDestroy = function()
+	{
+		freeAllLines (this.lines);
+		freeAllClip  (this.clipList);
+		freeAllClipUV(this.clipUV);
+		cr.wipe(this.characterWidthList);
+	};
 	instanceProto.onCreate = function()
 	{
-		this.text = this.properties[0];
-		this.visible = (this.properties[1] === 0);		// 0=visible, 1=invisible
-		this.font = this.properties[2];
-		this.color = this.properties[3];
-		this.halign = this.properties[4];				// 0=left, 1=center, 2=right
-		this.valign = this.properties[5];				// 0=top, 1=center, 2=bottom
-		this.wrapbyword = (this.properties[7] === 0);	// 0=word, 1=character
-		this.lastwidth = this.width;
-		this.lastwrapwidth = this.width;
-		this.lastheight = this.height;
-		this.line_height_offset = this.properties[8];
-		this.facename = "";
-		this.fontstyle = "";
-		this.ptSize = 0;
-		this.textWidth = 0;
+		this.texture_img      = this.type.texture_img;
+		this.characterWidth   = this.properties[0];
+		this.characterHeight  = this.properties[1];
+		this.characterSet     = this.properties[2];
+		this.text             = this.properties[3];
+		this.characterScale   = this.properties[4];
+		this.visible          = (this.properties[5] === 0);	// 0=visible, 1=invisible
+		this.halign           = this.properties[6]/2.0;		// 0=left, 1=center, 2=right
+		this.valign           = this.properties[7]/2.0;		// 0=top, 1=center, 2=bottom
+		this.wrapbyword       = (this.properties[9] === 0);	// 0=word, 1=character
+		this.characterSpacing = this.properties[10];
+		this.lineHeight       = this.properties[11];
+		this.textWidth  = 0;
 		this.textHeight = 0;
-		this.parseFont();
-		this.mycanvas = null;
-		this.myctx = null;
-		this.mytex = null;
-		this.need_text_redraw = false;
-		this.last_render_tick = this.runtime.tickcount;
 		if (this.recycled)
-			this.rcTex.set(0, 0, 1, 1);
-		else
-			this.rcTex = new cr.rect(0, 0, 1, 1);
-		if (this.runtime.glwrap)
-			this.runtime.tickMe(this);
-;
-	};
-	instanceProto.parseFont = function ()
-	{
-		var arr = this.font.split(" ");
-		var i;
-		for (i = 0; i < arr.length; i++)
 		{
-			if (arr[i].substr(arr[i].length - 2, 2) === "pt")
-			{
-				this.ptSize = parseInt(arr[i].substr(0, arr[i].length - 2));
-				this.pxHeight = Math.ceil((this.ptSize / 72.0) * 96.0) + 4;	// assume 96dpi...
-				if (i > 0)
-					this.fontstyle = arr[i - 1];
-				this.facename = arr[i + 1];
-				for (i = i + 2; i < arr.length; i++)
-					this.facename += " " + arr[i];
-				break;
-			}
+			cr.clearArray(this.lines);
+			cr.wipe(this.clipList);
+			cr.wipe(this.clipUV);
+			cr.wipe(this.characterWidthList);
 		}
+		else
+		{
+			this.lines = [];
+			this.clipList = {};
+			this.clipUV = {};
+			this.characterWidthList = {};
+		}
+		this.text_changed = true;
+		this.lastwrapwidth = this.width;
+		if (this.runtime.glwrap)
+		{
+			if (!this.type.webGL_texture)
+			{
+				this.type.webGL_texture = this.runtime.glwrap.loadTexture(this.type.texture_img, false, this.runtime.linearSampling, this.type.texture_pixelformat);
+			}
+			this.webGL_texture = this.type.webGL_texture;
+		}
+		this.SplitSheet();
 	};
 	instanceProto.saveToJSON = function ()
 	{
-		return {
+		var save = {
 			"t": this.text,
-			"f": this.font,
-			"c": this.color,
-			"ha": this.halign,
-			"va": this.valign,
-			"wr": this.wrapbyword,
-			"lho": this.line_height_offset,
-			"fn": this.facename,
-			"fs": this.fontstyle,
-			"ps": this.ptSize,
-			"pxh": this.pxHeight,
+			"csc": this.characterScale,
+			"csp": this.characterSpacing,
+			"lh": this.lineHeight,
 			"tw": this.textWidth,
 			"th": this.textHeight,
-			"lrt": this.last_render_tick
+			"lrt": this.last_render_tick,
+			"ha": this.halign,
+			"va": this.valign,
+			"cw": {}
 		};
+		for (var ch in this.characterWidthList)
+			save["cw"][ch] = this.characterWidthList[ch];
+		return save;
 	};
 	instanceProto.loadFromJSON = function (o)
 	{
 		this.text = o["t"];
-		this.font = o["f"];
-		this.color = o["c"];
-		this.halign = o["ha"];
-		this.valign = o["va"];
-		this.wrapbyword = o["wr"];
-		this.line_height_offset = o["lho"];
-		this.facename = o["fn"];
-		this.fontstyle = o["fs"];
-		this.ptSize = o["ps"];
-		this.pxHeight = o["pxh"];
+		this.characterScale = o["csc"];
+		this.characterSpacing = o["csp"];
+		this.lineHeight = o["lh"];
 		this.textWidth = o["tw"];
 		this.textHeight = o["th"];
 		this.last_render_tick = o["lrt"];
+		if (o.hasOwnProperty("ha"))
+			this.halign = o["ha"];
+		if (o.hasOwnProperty("va"))
+			this.valign = o["va"];
+		for(var ch in o["cw"])
+			this.characterWidthList[ch] = o["cw"][ch];
 		this.text_changed = true;
-		this.lastwidth = this.width;
 		this.lastwrapwidth = this.width;
-		this.lastheight = this.height;
 	};
-	instanceProto.tick = function ()
+	function trimRight(text)
 	{
-		if (this.runtime.glwrap && this.mytex && (this.runtime.tickcount - this.last_render_tick >= 300))
-		{
-			var layer = this.layer;
-            this.update_bbox();
-            var bbox = this.bbox;
-            if (bbox.right < layer.viewLeft || bbox.bottom < layer.viewTop || bbox.left > layer.viewRight || bbox.top > layer.viewBottom)
-			{
-				this.runtime.glwrap.deleteTexture(this.mytex);
-				this.mytex = null;
-				this.myctx = null;
-				this.mycanvas = null;
-			}
-		}
-	};
-	instanceProto.onDestroy = function ()
+		return text.replace(/\s\s*$/, '');
+	}
+	var MAX_CACHE_SIZE = 1000;
+	function alloc(cache,Constructor)
 	{
-		this.myctx = null;
-		this.mycanvas = null;
-		if (this.runtime.glwrap && this.mytex)
-			this.runtime.glwrap.deleteTexture(this.mytex);
-		this.mytex = null;
-	};
-	instanceProto.updateFont = function ()
-	{
-		this.font = this.fontstyle + " " + this.ptSize.toString() + "pt " + this.facename;
-		this.text_changed = true;
-		this.runtime.redraw = true;
-	};
-	instanceProto.draw = function(ctx, glmode)
-	{
-		ctx.font = this.font;
-		ctx.textBaseline = "top";
-		ctx.fillStyle = this.color;
-		ctx.globalAlpha = glmode ? 1 : this.opacity;
-		var myscale = 1;
-		if (glmode)
-		{
-			myscale = Math.abs(this.layer.getScale());
-			ctx.save();
-			ctx.scale(myscale, myscale);
-		}
-		if (this.text_changed || this.width !== this.lastwrapwidth)
-		{
-			this.type.plugin.WordWrap(this.text, this.lines, ctx, this.width, this.wrapbyword);
-			this.text_changed = false;
-			this.lastwrapwidth = this.width;
-		}
-		this.update_bbox();
-		var penX = glmode ? 0 : this.bquad.tlx;
-		var penY = glmode ? 0 : this.bquad.tly;
-		if (this.runtime.pixel_rounding)
-		{
-			penX = (penX + 0.5) | 0;
-			penY = (penY + 0.5) | 0;
-		}
-		if (this.angle !== 0 && !glmode)
-		{
-			ctx.save();
-			ctx.translate(penX, penY);
-			ctx.rotate(this.angle);
-			penX = 0;
-			penY = 0;
-		}
-		var endY = penY + this.height;
-		var line_height = this.pxHeight;
-		line_height += this.line_height_offset;
-		var drawX;
-		var i;
-		if (this.valign === 1)		// center
-			penY += Math.max(this.height / 2 - (this.lines.length * line_height) / 2, 0);
-		else if (this.valign === 2)	// bottom
-			penY += Math.max(this.height - (this.lines.length * line_height) - 2, 0);
-		for (i = 0; i < this.lines.length; i++)
-		{
-			drawX = penX;
-			if (this.halign === 1)		// center
-				drawX = penX + (this.width - this.lines[i].width) / 2;
-			else if (this.halign === 2)	// right
-				drawX = penX + (this.width - this.lines[i].width);
-			ctx.fillText(this.lines[i].text, drawX, penY);
-			penY += line_height;
-			if (penY >= endY - line_height)
-				break;
-		}
-		if (this.angle !== 0 || glmode)
-			ctx.restore();
-		this.last_render_tick = this.runtime.tickcount;
-	};
-	instanceProto.drawGL = function(glw)
-	{
-		if (this.width < 1 || this.height < 1)
-			return;
-		var need_redraw = this.text_changed || this.need_text_redraw;
-		this.need_text_redraw = false;
-		var layer_scale = this.layer.getScale();
-		var layer_angle = this.layer.getAngle();
-		var rcTex = this.rcTex;
-		var floatscaledwidth = layer_scale * this.width;
-		var floatscaledheight = layer_scale * this.height;
-		var scaledwidth = Math.ceil(floatscaledwidth);
-		var scaledheight = Math.ceil(floatscaledheight);
-		var absscaledwidth = Math.abs(scaledwidth);
-		var absscaledheight = Math.abs(scaledheight);
-		var halfw = this.runtime.draw_width / 2;
-		var halfh = this.runtime.draw_height / 2;
-		if (!this.myctx)
-		{
-			this.mycanvas = document.createElement("canvas");
-			this.mycanvas.width = absscaledwidth;
-			this.mycanvas.height = absscaledheight;
-			this.lastwidth = absscaledwidth;
-			this.lastheight = absscaledheight;
-			need_redraw = true;
-			this.myctx = this.mycanvas.getContext("2d");
-		}
-		if (absscaledwidth !== this.lastwidth || absscaledheight !== this.lastheight)
-		{
-			this.mycanvas.width = absscaledwidth;
-			this.mycanvas.height = absscaledheight;
-			if (this.mytex)
-			{
-				glw.deleteTexture(this.mytex);
-				this.mytex = null;
-			}
-			need_redraw = true;
-		}
-		if (need_redraw)
-		{
-			this.myctx.clearRect(0, 0, absscaledwidth, absscaledheight);
-			this.draw(this.myctx, true);
-			if (!this.mytex)
-				this.mytex = glw.createEmptyTexture(absscaledwidth, absscaledheight, this.runtime.linearSampling, this.runtime.isMobile);
-			glw.videoToTexture(this.mycanvas, this.mytex, this.runtime.isMobile);
-		}
-		this.lastwidth = absscaledwidth;
-		this.lastheight = absscaledheight;
-		glw.setTexture(this.mytex);
-		glw.setOpacity(this.opacity);
-		glw.resetModelView();
-		glw.translate(-halfw, -halfh);
-		glw.updateModelView();
-		var q = this.bquad;
-		var tlx = this.layer.layerToCanvas(q.tlx, q.tly, true, true);
-		var tly = this.layer.layerToCanvas(q.tlx, q.tly, false, true);
-		var trx = this.layer.layerToCanvas(q.trx, q.try_, true, true);
-		var try_ = this.layer.layerToCanvas(q.trx, q.try_, false, true);
-		var brx = this.layer.layerToCanvas(q.brx, q.bry, true, true);
-		var bry = this.layer.layerToCanvas(q.brx, q.bry, false, true);
-		var blx = this.layer.layerToCanvas(q.blx, q.bly, true, true);
-		var bly = this.layer.layerToCanvas(q.blx, q.bly, false, true);
-		if (this.runtime.pixel_rounding || (this.angle === 0 && layer_angle === 0))
-		{
-			var ox = ((tlx + 0.5) | 0) - tlx;
-			var oy = ((tly + 0.5) | 0) - tly
-			tlx += ox;
-			tly += oy;
-			trx += ox;
-			try_ += oy;
-			brx += ox;
-			bry += oy;
-			blx += ox;
-			bly += oy;
-		}
-		if (this.angle === 0 && layer_angle === 0)
-		{
-			trx = tlx + scaledwidth;
-			try_ = tly;
-			brx = trx;
-			bry = tly + scaledheight;
-			blx = tlx;
-			bly = bry;
-			rcTex.right = 1;
-			rcTex.bottom = 1;
-		}
+		if (cache.length)
+			return cache.pop();
 		else
+			return new Constructor();
+	}
+	function free(cache,data)
+	{
+		if (cache.length < MAX_CACHE_SIZE)
 		{
-			rcTex.right = floatscaledwidth / scaledwidth;
-			rcTex.bottom = floatscaledheight / scaledheight;
+			cache.push(data);
 		}
-		glw.quadTex(tlx, tly, trx, try_, brx, bry, blx, bly, rcTex);
-		glw.resetModelView();
-		glw.scale(layer_scale, layer_scale);
-		glw.rotateZ(-this.layer.getAngle());
-		glw.translate((this.layer.viewLeft + this.layer.viewRight) / -2, (this.layer.viewTop + this.layer.viewBottom) / -2);
-		glw.updateModelView();
-		this.last_render_tick = this.runtime.tickcount;
+	}
+	function freeAll(cache,dataList,isArray)
+	{
+		if (isArray) {
+			var i, len;
+			for (i = 0, len = dataList.length; i < len; i++)
+			{
+				free(cache,dataList[i]);
+			}
+			cr.clearArray(dataList);
+		} else {
+			var prop;
+			for(prop in dataList) {
+				if(Object.prototype.hasOwnProperty.call(dataList,prop)) {
+					free(cache,dataList[prop]);
+					delete dataList[prop];
+				}
+			}
+		}
+	}
+	function addLine(inst,lineIndex,cur_line) {
+		var lines = inst.lines;
+		var line;
+		cur_line = trimRight(cur_line);
+		if (lineIndex >= lines.length)
+			lines.push(allocLine());
+		line = lines[lineIndex];
+		line.text = cur_line;
+		line.width = inst.measureWidth(cur_line);
+		inst.textWidth = cr.max(inst.textWidth,line.width);
+	}
+	var linesCache = [];
+	function allocLine()       { return alloc(linesCache,Object); }
+	function freeLine(l)       { free(linesCache,l); }
+	function freeAllLines(arr) { freeAll(linesCache,arr,true); }
+	function addClip(obj,property,x,y,w,h) {
+		if (obj[property] === undefined) {
+			obj[property] = alloc(clipCache,Object);
+		}
+		obj[property].x = x;
+		obj[property].y = y;
+		obj[property].w = w;
+		obj[property].h = h;
+	}
+	var clipCache = [];
+	function allocClip()      { return alloc(clipCache,Object); }
+	function freeAllClip(obj) { freeAll(clipCache,obj,false);}
+	function addClipUV(obj,property,left,top,right,bottom) {
+		if (obj[property] === undefined) {
+			obj[property] = alloc(clipUVCache,cr.rect);
+		}
+		obj[property].left   = left;
+		obj[property].top    = top;
+		obj[property].right  = right;
+		obj[property].bottom = bottom;
+	}
+	var clipUVCache = [];
+	function allocClipUV()      { return alloc(clipUVCache,cr.rect);}
+	function freeAllClipUV(obj) { freeAll(clipUVCache,obj,false);}
+	instanceProto.SplitSheet = function() {
+		var texture      = this.texture_img;
+		var texWidth     = texture.width;
+		var texHeight    = texture.height;
+		var charWidth    = this.characterWidth;
+		var charHeight   = this.characterHeight;
+		var charU        = charWidth /texWidth;
+		var charV        = charHeight/texHeight;
+		var charSet      = this.characterSet ;
+		var cols = Math.floor(texWidth/charWidth);
+		var rows = Math.floor(texHeight/charHeight);
+		for ( var c = 0; c < charSet.length; c++) {
+			if  (c >= cols * rows) break;
+			var x = c%cols;
+			var y = Math.floor(c/cols);
+			var letter = charSet.charAt(c);
+			if (this.runtime.glwrap) {
+				addClipUV(
+					this.clipUV, letter,
+					x * charU ,
+					y * charV ,
+					(x+1) * charU ,
+					(y+1) * charV
+				);
+			} else {
+				addClip(
+					this.clipList, letter,
+					x * charWidth,
+					y * charHeight,
+					charWidth,
+					charHeight
+				);
+			}
+		}
 	};
+	/*
+     *	Word-Wrapping
+     */
 	var wordsCache = [];
 	pluginProto.TokeniseWords = function (text)
 	{
@@ -21734,121 +22322,350 @@ cr.plugins_.Text = function(runtime)
 		if (cur_word.length)
 			wordsCache.push(cur_word);
 	};
-	var linesCache = [];
-	function allocLine()
+	pluginProto.WordWrap = function (inst)
 	{
-		if (linesCache.length)
-			return linesCache.pop();
-		else
-			return {};
-	};
-	function freeLine(l)
-	{
-		linesCache.push(l);
-	};
-	function freeAllLines(arr)
-	{
-		var i, len;
-		for (i = 0, len = arr.length; i < len; i++)
-		{
-			freeLine(arr[i]);
-		}
-		cr.clearArray(arr);
-	};
-	pluginProto.WordWrap = function (text, lines, ctx, width, wrapbyword)
-	{
+		var text = inst.text;
+		var lines = inst.lines;
 		if (!text || !text.length)
 		{
 			freeAllLines(lines);
 			return;
 		}
+		var width = inst.width;
 		if (width <= 2.0)
 		{
 			freeAllLines(lines);
 			return;
 		}
-		if (text.length <= 100 && text.indexOf("\n") === -1)
+		var charWidth = inst.characterWidth;
+		var charScale = inst.characterScale;
+		var charSpacing = inst.characterSpacing;
+		if ( (text.length * (charWidth * charScale + charSpacing) - charSpacing) <= width && text.indexOf("\n") === -1)
 		{
-			var all_width = ctx.measureText(text).width;
+			var all_width = inst.measureWidth(text);
 			if (all_width <= width)
 			{
 				freeAllLines(lines);
 				lines.push(allocLine());
 				lines[0].text = text;
 				lines[0].width = all_width;
+				inst.textWidth  = all_width;
+				inst.textHeight = inst.characterHeight * charScale + inst.lineHeight;
 				return;
 			}
 		}
-		this.WrapText(text, lines, ctx, width, wrapbyword);
+		var wrapbyword = inst.wrapbyword;
+		this.WrapText(inst);
+		inst.textHeight = lines.length * (inst.characterHeight * charScale + inst.lineHeight);
 	};
-	function trimSingleSpaceRight(str)
+	pluginProto.WrapText = function (inst)
 	{
-		if (!str.length || str.charAt(str.length - 1) !== " ")
-			return str;
-		return str.substring(0, str.length - 1);
-	};
-	pluginProto.WrapText = function (text, lines, ctx, width, wrapbyword)
-	{
+		var wrapbyword = inst.wrapbyword;
+		var text       = inst.text;
+		var lines      = inst.lines;
+		var width      = inst.width;
 		var wordArray;
-		if (wrapbyword)
-		{
+		if (wrapbyword) {
 			this.TokeniseWords(text);	// writes to wordsCache
 			wordArray = wordsCache;
-		}
-		else
+		} else {
 			wordArray = text;
+		}
 		var cur_line = "";
 		var prev_line;
 		var line_width;
 		var i;
 		var lineIndex = 0;
 		var line;
+		var ignore_newline = false;
 		for (i = 0; i < wordArray.length; i++)
 		{
 			if (wordArray[i] === "\n")
 			{
-				if (lineIndex >= lines.length)
-					lines.push(allocLine());
-				cur_line = trimSingleSpaceRight(cur_line);		// for correct center/right alignment
-				line = lines[lineIndex];
-				line.text = cur_line;
-				line.width = ctx.measureText(cur_line).width;
-				lineIndex++;
+				if (ignore_newline === true) {
+					ignore_newline = false;
+				} else {
+					addLine(inst,lineIndex,cur_line);
+					lineIndex++;
+				}
 				cur_line = "";
 				continue;
 			}
+			ignore_newline = false;
 			prev_line = cur_line;
 			cur_line += wordArray[i];
-			line_width = ctx.measureText(cur_line).width;
-			if (line_width >= width)
+			line_width = inst.measureWidth(trimRight(cur_line));
+			if (line_width > width)
 			{
-				if (lineIndex >= lines.length)
-					lines.push(allocLine());
-				prev_line = trimSingleSpaceRight(prev_line);
-				line = lines[lineIndex];
-				line.text = prev_line;
-				line.width = ctx.measureText(prev_line).width;
+				if (prev_line === "") {
+					addLine(inst,lineIndex,cur_line);
+					cur_line = "";
+					ignore_newline = true;
+				} else {
+					addLine(inst,lineIndex,prev_line);
+					cur_line = wordArray[i];
+				}
 				lineIndex++;
-				cur_line = wordArray[i];
 				if (!wrapbyword && cur_line === " ")
 					cur_line = "";
 			}
 		}
-		if (cur_line.length)
+		if (trimRight(cur_line).length)
 		{
-			if (lineIndex >= lines.length)
-				lines.push(allocLine());
-			cur_line = trimSingleSpaceRight(cur_line);
-			line = lines[lineIndex];
-			line.text = cur_line;
-			line.width = ctx.measureText(cur_line).width;
+			addLine(inst,lineIndex,cur_line);
 			lineIndex++;
 		}
 		for (i = lineIndex; i < lines.length; i++)
 			freeLine(lines[i]);
 		lines.length = lineIndex;
 	};
-	function Cnds() {};
+	instanceProto.measureWidth = function(text) {
+		var spacing = this.characterSpacing;
+		var len     = text.length;
+		var width   = 0;
+		for (var i = 0; i < len; i++) {
+			width += this.getCharacterWidth(text.charAt(i)) * this.characterScale + spacing;
+		}
+		width -= (width > 0) ? spacing : 0;
+		return width;
+	};
+	/***/
+	instanceProto.getCharacterWidth = function(character) {
+		var widthList = this.characterWidthList;
+		if (widthList[character] !== undefined) {
+			return widthList[character];
+		} else {
+			return this.characterWidth;
+		}
+	};
+	instanceProto.rebuildText = function() {
+		if (this.text_changed || this.width !== this.lastwrapwidth) {
+			this.textWidth = 0;
+			this.textHeight = 0;
+			this.type.plugin.WordWrap(this);
+			this.text_changed = false;
+			this.lastwrapwidth = this.width;
+		}
+	};
+	var EPSILON = 0.00001;
+	instanceProto.draw = function(ctx, glmode)
+	{
+		var texture = this.texture_img;
+		if (this.text !== "" && texture != null) {
+			this.rebuildText();
+			if (this.height < this.characterHeight*this.characterScale + this.lineHeight) {
+				return;
+			}
+			ctx.globalAlpha = this.opacity;
+			var myx = this.x;
+			var myy = this.y;
+			if (this.runtime.pixel_rounding)
+			{
+				myx = Math.round(myx);
+				myy = Math.round(myy);
+			}
+			var viewLeft = this.layer.viewLeft;
+			var viewTop = this.layer.viewTop;
+			var viewRight = this.layer.viewRight;
+			var viewBottom = this.layer.viewBottom;
+			ctx.save();
+			ctx.translate(myx, myy);
+			ctx.rotate(this.angle);
+			var angle      = this.angle;
+			var ha         = this.halign;
+			var va         = this.valign;
+			var scale      = this.characterScale;
+			var charHeight = this.characterHeight * scale;
+			var lineHeight = this.lineHeight;
+			var charSpace  = this.characterSpacing;
+			var lines = this.lines;
+			var textHeight = this.textHeight;
+			var letterWidth;
+			var halign;
+			var valign = va * cr.max(0,(this.height - textHeight));
+			var offx = -(this.hotspotX * this.width);
+			var offy = -(this.hotspotY * this.height);
+			offy += valign;
+			var drawX ;
+			var drawY = offy;
+			var roundX, roundY;
+			for(var i = 0; i < lines.length; i++) {
+				var line = lines[i].text;
+				var len  = lines[i].width;
+				halign = ha * cr.max(0,this.width - len);
+				drawX = offx + halign;
+				drawY += lineHeight;
+				if (angle === 0 && myy + drawY + charHeight < viewTop)
+				{
+					drawY += charHeight;
+					continue;
+				}
+				for(var j = 0; j < line.length; j++) {
+					var letter = line.charAt(j);
+					letterWidth = this.getCharacterWidth(letter);
+					var clip = this.clipList[letter];
+					if (angle === 0 && myx + drawX + letterWidth * scale + charSpace < viewLeft)
+					{
+						drawX += letterWidth * scale + charSpace;
+						continue;
+					}
+					if ( drawX + letterWidth * scale > this.width + EPSILON ) {
+						break;
+					}
+					if (clip !== undefined) {
+						roundX = drawX;
+						roundY = drawY;
+						if (angle === 0 && scale === 1)
+						{
+							roundX = Math.round(roundX);
+							roundY = Math.round(roundY);
+						}
+						ctx.drawImage( this.texture_img,
+									 clip.x, clip.y, clip.w, clip.h,
+									 roundX,roundY,clip.w*scale,clip.h*scale);
+					}
+					drawX += letterWidth * scale + charSpace;
+					if (angle === 0 && myx + drawX > viewRight)
+						break;
+				}
+				drawY += charHeight;
+				if (angle === 0 && (drawY + charHeight + lineHeight > this.height || myy + drawY > viewBottom))
+				{
+					break;
+				}
+			}
+			ctx.restore();
+		}
+	};
+	var dQuad = new cr.quad();
+	function rotateQuad(quad,cosa,sina) {
+		var x_temp;
+		x_temp   = (quad.tlx * cosa) - (quad.tly * sina);
+		quad.tly = (quad.tly * cosa) + (quad.tlx * sina);
+		quad.tlx = x_temp;
+		x_temp    = (quad.trx * cosa) - (quad.try_ * sina);
+		quad.try_ = (quad.try_ * cosa) + (quad.trx * sina);
+		quad.trx  = x_temp;
+		x_temp   = (quad.blx * cosa) - (quad.bly * sina);
+		quad.bly = (quad.bly * cosa) + (quad.blx * sina);
+		quad.blx = x_temp;
+		x_temp    = (quad.brx * cosa) - (quad.bry * sina);
+		quad.bry = (quad.bry * cosa) + (quad.brx * sina);
+		quad.brx  = x_temp;
+	}
+	instanceProto.drawGL = function(glw)
+	{
+		glw.setTexture(this.webGL_texture);
+		glw.setOpacity(this.opacity);
+		if (!this.text)
+			return;
+		this.rebuildText();
+		if (this.height < this.characterHeight*this.characterScale + this.lineHeight) {
+			return;
+		}
+		this.update_bbox();
+		var q = this.bquad;
+		var ox = 0;
+		var oy = 0;
+		if (this.runtime.pixel_rounding)
+		{
+			ox = Math.round(this.x) - this.x;
+			oy = Math.round(this.y) - this.y;
+		}
+		var viewLeft = this.layer.viewLeft;
+		var viewTop = this.layer.viewTop;
+		var viewRight = this.layer.viewRight;
+		var viewBottom = this.layer.viewBottom;
+		var angle      = this.angle;
+		var ha         = this.halign;
+		var va         = this.valign;
+		var scale      = this.characterScale;
+		var charHeight = this.characterHeight * scale;   // to precalculate in onCreate or on change
+		var lineHeight = this.lineHeight;
+		var charSpace  = this.characterSpacing;
+		var lines = this.lines;
+		var textHeight = this.textHeight;
+		var letterWidth;
+		var cosa,sina;
+		if (angle !== 0)
+		{
+			cosa = Math.cos(angle);
+			sina = Math.sin(angle);
+		}
+		var halign;
+		var valign = va * cr.max(0,(this.height - textHeight));
+		var offx = q.tlx + ox;
+		var offy = q.tly + oy;
+		var drawX ;
+		var drawY = valign;
+		var roundX, roundY;
+		for(var i = 0; i < lines.length; i++) {
+			var line       = lines[i].text;
+			var lineWidth  = lines[i].width;
+			halign = ha * cr.max(0,this.width - lineWidth);
+			drawX = halign;
+			drawY += lineHeight;
+			if (angle === 0 && offy + drawY + charHeight < viewTop)
+			{
+				drawY += charHeight;
+				continue;
+			}
+			for(var j = 0; j < line.length; j++) {
+				var letter = line.charAt(j);
+				letterWidth = this.getCharacterWidth(letter);
+				var clipUV = this.clipUV[letter];
+				if (angle === 0 && offx + drawX + letterWidth * scale + charSpace < viewLeft)
+				{
+					drawX += letterWidth * scale + charSpace;
+					continue;
+				}
+				if (drawX + letterWidth * scale > this.width + EPSILON)
+				{
+					break;
+				}
+				if (clipUV !== undefined) {
+					var clipWidth  = this.characterWidth*scale;
+					var clipHeight = this.characterHeight*scale;
+					roundX = drawX;
+					roundY = drawY;
+					if (angle === 0 && scale === 1)
+					{
+						roundX = Math.round(roundX);
+						roundY = Math.round(roundY);
+					}
+					dQuad.tlx  = roundX;
+					dQuad.tly  = roundY;
+					dQuad.trx  = roundX + clipWidth;
+					dQuad.try_ = roundY ;
+					dQuad.blx  = roundX;
+					dQuad.bly  = roundY + clipHeight;
+					dQuad.brx  = roundX + clipWidth;
+					dQuad.bry  = roundY + clipHeight;
+					if(angle !== 0)
+					{
+						rotateQuad(dQuad,cosa,sina);
+					}
+					dQuad.offset(offx,offy);
+					glw.quadTex(
+						dQuad.tlx, dQuad.tly,
+						dQuad.trx, dQuad.try_,
+						dQuad.brx, dQuad.bry,
+						dQuad.blx, dQuad.bly,
+						clipUV
+					);
+				}
+				drawX += letterWidth * scale + charSpace;
+				if (angle === 0 && offx + drawX > viewRight)
+					break;
+			}
+			drawY += charHeight;
+			if (angle === 0 && (drawY + charHeight + lineHeight > this.height || offy + drawY > viewBottom))
+			{
+				break;
+			}
+		}
+	};
+	function Cnds() {}
 	Cnds.prototype.CompareText = function(text_to_compare, case_sensitive)
 	{
 		if (case_sensitive)
@@ -21857,7 +22674,7 @@ cr.plugins_.Text = function(runtime)
 			return cr.equals_nocase(this.text, text_to_compare);
 	};
 	pluginProto.cnds = new Cnds();
-	function Acts() {};
+	function Acts() {}
 	Acts.prototype.SetText = function(param)
 	{
 		if (cr.is_number(param) && param < 1e9)
@@ -21882,78 +22699,45 @@ cr.plugins_.Text = function(runtime)
 			this.runtime.redraw = true;
 		}
 	};
-	Acts.prototype.SetFontFace = function (face_, style_)
+	Acts.prototype.SetScale = function(param)
 	{
-		var newstyle = "";
-		switch (style_) {
-		case 1: newstyle = "bold"; break;
-		case 2: newstyle = "italic"; break;
-		case 3: newstyle = "bold italic"; break;
+		if (param !== this.characterScale) {
+			this.characterScale = param;
+			this.text_changed = true;
+			this.runtime.redraw = true;
 		}
-		if (face_ === this.facename && newstyle === this.fontstyle)
-			return;		// no change
-		this.facename = face_;
-		this.fontstyle = newstyle;
-		this.updateFont();
 	};
-	Acts.prototype.SetFontSize = function (size_)
+	Acts.prototype.SetCharacterSpacing = function(param)
 	{
-		if (this.ptSize === size_)
-			return;
-		this.ptSize = size_;
-		this.pxHeight = Math.ceil((this.ptSize / 72.0) * 96.0) + 4;	// assume 96dpi...
-		this.updateFont();
-	};
-	Acts.prototype.SetFontColor = function (rgb)
-	{
-		var newcolor = "rgb(" + cr.GetRValue(rgb).toString() + "," + cr.GetGValue(rgb).toString() + "," + cr.GetBValue(rgb).toString() + ")";
-		if (newcolor === this.color)
-			return;
-		this.color = newcolor;
-		this.need_text_redraw = true;
-		this.runtime.redraw = true;
-	};
-	Acts.prototype.SetWebFont = function (familyname_, cssurl_)
-	{
-		if (this.runtime.isDomFree)
-		{
-			cr.logexport("[Construct 2] Text plugin: 'Set web font' not supported on this platform - the action has been ignored");
-			return;		// DC todo
+		if (param !== this.CharacterSpacing) {
+			this.characterSpacing = param;
+			this.text_changed = true;
+			this.runtime.redraw = true;
 		}
-		var self = this;
-		var refreshFunc = (function () {
-							self.runtime.redraw = true;
-							self.text_changed = true;
-						});
-		if (requestedWebFonts.hasOwnProperty(cssurl_))
-		{
-			var newfacename = "'" + familyname_ + "'";
-			if (this.facename === newfacename)
-				return;	// no change
-			this.facename = newfacename;
-			this.updateFont();
-			for (var i = 1; i < 10; i++)
-			{
-				setTimeout(refreshFunc, i * 100);
-				setTimeout(refreshFunc, i * 1000);
+	};
+	Acts.prototype.SetLineHeight = function(param)
+	{
+		if (param !== this.lineHeight) {
+			this.lineHeight = param;
+			this.text_changed = true;
+			this.runtime.redraw = true;
+		}
+	};
+	instanceProto.SetCharWidth = function(character,width) {
+		var w = parseInt(width,10);
+		if (this.characterWidthList[character] !== w) {
+			this.characterWidthList[character] = w;
+			this.text_changed = true;
+			this.runtime.redraw = true;
+		}
+	};
+	Acts.prototype.SetCharacterWidth = function(characterSet,width)
+	{
+		if (characterSet !== "") {
+			for(var c = 0; c < characterSet.length; c++) {
+				this.SetCharWidth(characterSet.charAt(c),width);
 			}
-			return;
 		}
-		var wf = document.createElement("link");
-		wf.href = cssurl_;
-		wf.rel = "stylesheet";
-		wf.type = "text/css";
-		wf.onload = refreshFunc;
-		document.getElementsByTagName('head')[0].appendChild(wf);
-		requestedWebFonts[cssurl_] = true;
-		this.facename = "'" + familyname_ + "'";
-		this.updateFont();
-		for (var i = 1; i < 10; i++)
-		{
-			setTimeout(refreshFunc, i * 100);
-			setTimeout(refreshFunc, i * 1000);
-		}
-;
 	};
 	Acts.prototype.SetEffect = function (effect)
 	{
@@ -21962,35 +22746,53 @@ cr.plugins_.Text = function(runtime)
 		cr.setGLBlend(this, effect, this.runtime.gl);
 		this.runtime.redraw = true;
 	};
+	Acts.prototype.SetHAlign = function (a)
+	{
+		this.halign = a / 2.0;
+		this.text_changed = true;
+		this.runtime.redraw = true;
+	};
+	Acts.prototype.SetVAlign = function (a)
+	{
+		this.valign = a / 2.0;
+		this.text_changed = true;
+		this.runtime.redraw = true;
+	};
 	pluginProto.acts = new Acts();
-	function Exps() {};
+	function Exps() {}
+	Exps.prototype.CharacterWidth = function(ret,character)
+	{
+		ret.set_int(this.getCharacterWidth(character));
+	};
+	Exps.prototype.CharacterHeight = function(ret)
+	{
+		ret.set_int(this.characterHeight);
+	};
+	Exps.prototype.CharacterScale = function(ret)
+	{
+		ret.set_float(this.characterScale);
+	};
+	Exps.prototype.CharacterSpacing = function(ret)
+	{
+		ret.set_int(this.characterSpacing);
+	};
+	Exps.prototype.LineHeight = function(ret)
+	{
+		ret.set_int(this.lineHeight);
+	};
 	Exps.prototype.Text = function(ret)
 	{
 		ret.set_string(this.text);
 	};
-	Exps.prototype.FaceName = function (ret)
-	{
-		ret.set_string(this.facename);
-	};
-	Exps.prototype.FaceSize = function (ret)
-	{
-		ret.set_int(this.ptSize);
-	};
 	Exps.prototype.TextWidth = function (ret)
 	{
-		var w = 0;
-		var i, len, x;
-		for (i = 0, len = this.lines.length; i < len; i++)
-		{
-			x = this.lines[i].width;
-			if (w < x)
-				w = x;
-		}
-		ret.set_int(w);
+		this.rebuildText();
+		ret.set_float(this.textWidth);
 	};
 	Exps.prototype.TextHeight = function (ret)
 	{
-		ret.set_int(this.lines.length * (this.pxHeight + this.line_height_offset) - this.line_height_offset);
+		this.rebuildText();
+		ret.set_float(this.textHeight);
 	};
 	pluginProto.exps = new Exps();
 }());
@@ -26669,30 +27471,40 @@ cr.plugins_.rojoPaster = function(runtime)
 	pluginProto.exps = new Exps();
 }());
 cr.getObjectRefTable = function () { return [
+	cr.plugins_.NinePatch,
 	cr.plugins_.Function,
-	cr.plugins_.gamepad,
 	cr.plugins_.Mouse,
+	cr.plugins_.gamepad,
 	cr.plugins_.Keyboard,
 	cr.plugins_.Audio,
+	cr.plugins_.Dictionary,
 	cr.plugins_.Button,
 	cr.plugins_.filechooser,
 	cr.plugins_.Browser,
-	cr.plugins_.Sprite,
 	cr.plugins_.Tilemap,
 	cr.plugins_.TiledBg,
-	cr.plugins_.rojoPaster,
 	cr.plugins_.Touch,
-	cr.plugins_.Text,
 	cr.plugins_.WebStorage,
+	cr.plugins_.Sprite,
+	cr.plugins_.rojoPaster,
+	cr.plugins_.Spritefont2,
 	cr.system_object.prototype.cnds.OnLayoutStart,
+	cr.plugins_.Dictionary.prototype.acts.AddKey,
+	cr.plugins_.Mouse.prototype.cnds.OnWheel,
+	cr.system_object.prototype.cnds.CompareVar,
 	cr.system_object.prototype.acts.SetVar,
-	cr.plugins_.Tilemap.prototype.exps.TilesJSON,
+	cr.plugins_.Mouse.prototype.cnds.IsButtonDown,
+	cr.system_object.prototype.acts.AddVar,
+	cr.system_object.prototype.acts.SubVar,
+	cr.plugins_.Keyboard.prototype.cnds.OnKey,
 	cr.plugins_.Sprite.prototype.acts.SetInstanceVar,
+	cr.plugins_.Sprite.prototype.acts.SetBoolInstanceVar,
+	cr.system_object.prototype.cnds.Else,
+	cr.plugins_.Tilemap.prototype.exps.TilesJSON,
 	cr.system_object.prototype.exps.random,
 	cr.plugins_.Tilemap.prototype.acts.LoadURL,
 	cr.plugins_.WebStorage.prototype.exps.LocalValue,
 	cr.plugins_.Sprite.prototype.cnds.IsOnScreen,
-	cr.plugins_.Sprite.prototype.acts.SetBoolInstanceVar,
 	cr.system_object.prototype.cnds.Every,
 	cr.plugins_.Sprite.prototype.cnds.IsBoolInstanceVarSet,
 	cr.plugins_.Sprite.prototype.acts.SubInstanceVar,
@@ -26707,10 +27519,12 @@ cr.getObjectRefTable = function () { return [
 	cr.system_object.prototype.cnds.IsGroupActive,
 	cr.system_object.prototype.cnds.EveryTick,
 	cr.plugins_.Sprite.prototype.acts.AddInstanceVar,
-	cr.plugins_.Tilemap.prototype.cnds.CompareTileAt,
+	cr.plugins_.Dictionary.prototype.cnds.CompareValue,
+	cr.system_object.prototype.exps.str,
+	cr.plugins_.Tilemap.prototype.exps.TileAt,
 	cr.system_object.prototype.exps.round,
+	cr.plugins_.Tilemap.prototype.cnds.CompareTileAt,
 	cr.plugins_.Function.prototype.acts.CallFunction,
-	cr.system_object.prototype.cnds.Else,
 	cr.plugins_.Sprite.prototype.acts.SetMirrored,
 	cr.system_object.prototype.exps.abs,
 	cr.plugins_.Sprite.prototype.acts.SetX,
@@ -26725,32 +27539,47 @@ cr.getObjectRefTable = function () { return [
 	cr.system_object.prototype.acts.Wait,
 	cr.plugins_.Sprite.prototype.acts.Destroy,
 	cr.plugins_.Tilemap.prototype.acts.SetTile,
+	cr.plugins_.Mouse.prototype.exps.X,
+	cr.plugins_.Mouse.prototype.exps.Y,
 	cr.plugins_.rojoPaster.prototype.acts.SetX,
 	cr.plugins_.rojoPaster.prototype.acts.ClearColor,
-	cr.plugins_.Mouse.prototype.cnds.IsButtonDown,
+	cr.plugins_.rojoPaster.prototype.acts.PasteObject,
+	cr.system_object.prototype.exps.zeropad,
+	cr.plugins_.Spritefont2.prototype.acts.SetText,
+	cr.system_object.prototype.exps.uppercase,
+	cr.plugins_.Tilemap.prototype.acts.SetOpacity,
 	cr.plugins_.Tilemap.prototype.acts.SetPos,
 	cr.plugins_.Tilemap.prototype.acts.SetSize,
 	cr.plugins_.Tilemap.prototype.exps.Width,
 	cr.plugins_.Tilemap.prototype.exps.Height,
 	cr.plugins_.Tilemap.prototype.acts.LoadFromJSON,
-	cr.plugins_.rojoPaster.prototype.acts.PasteObject,
 	cr.plugins_.Tilemap.prototype.acts.SetX,
 	cr.plugins_.Tilemap.prototype.exps.X,
 	cr.system_object.prototype.cnds.Repeat,
 	cr.plugins_.Sprite.prototype.cnds.IsMirrored,
-	cr.system_object.prototype.acts.AddVar,
 	cr.plugins_.Tilemap.prototype.acts.SetY,
 	cr.plugins_.Tilemap.prototype.exps.Y,
-	cr.system_object.prototype.cnds.CompareVar,
+	cr.plugins_.NinePatch.prototype.acts.SetPos,
+	cr.plugins_.Spritefont2.prototype.acts.SetX,
+	cr.plugins_.rojoPaster.prototype.exps.X,
+	cr.system_object.prototype.exps.replace,
+	cr.plugins_.Spritefont2.prototype.exps.Text,
+	cr.system_object.prototype.exps.newline,
+	cr.plugins_.Tilemap.prototype.acts.EraseTileRange,
+	cr.plugins_.Tilemap.prototype.acts.SetTileRange,
+	cr.plugins_.Spritefont2.prototype.acts.SetWidth,
+	cr.plugins_.Spritefont2.prototype.acts.SetHeight,
+	cr.plugins_.Spritefont2.prototype.acts.SetY,
+	cr.plugins_.Spritefont2.prototype.acts.SetPos,
+	cr.plugins_.Spritefont2.prototype.exps.X,
+	cr.plugins_.Spritefont2.prototype.exps.Y,
+	cr.plugins_.Spritefont2.prototype.acts.SetEffectParam,
 	cr.plugins_.Function.prototype.cnds.OnFunction,
 	cr.system_object.prototype.acts.RestartLayout,
 	cr.plugins_.Mouse.prototype.cnds.IsOverObject,
-	cr.plugins_.Button.prototype.cnds.OnClicked,
-	cr.system_object.prototype.acts.GoToLayout,
-	cr.plugins_.Button.prototype.acts.SetText,
-	cr.plugins_.Browser.prototype.exps.Hash,
-	cr.system_object.prototype.exps.replace,
-	cr.plugins_.filechooser.prototype.cnds.OnChanged,
-	cr.plugins_.WebStorage.prototype.acts.StoreLocal,
-	cr.plugins_.filechooser.prototype.exps.FileURLAt
+	cr.system_object.prototype.acts.SetLayerVisible,
+	cr.plugins_.Spritefont2.prototype.cnds.IsBoolInstanceVarSet,
+	cr.system_object.prototype.exps.layoutname,
+	cr.system_object.prototype.cnds.LayerVisible,
+	cr.system_object.prototype.acts.GoToLayout
 ];};
