@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1615343450,
+	"version": 1615569294,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -24,6 +24,12 @@
 		"images/dialougebox.png",
 		"images/particle.png",
 		"images/hand-sheet0.png",
+		"images/blockhit-sheet0.png",
+		"images/loadingbarback.png",
+		"images/loadingbar-sheet0.png",
+		"images/mariowalk-sheet0.png",
+		"images/mariowalk-sheet1.png",
+		"images/mariowalk-sheet2.png",
 		"media/smb_1-up.ogg",
 		"media/smb_breakblock.ogg",
 		"media/smb_bump.ogg",
@@ -44,6 +50,7 @@
 		"media/smb_vine.ogg",
 		"media/smb_mariodie.ogg",
 		"media/smb_bounce.ogg",
+		"media/smb_warning.ogg",
 		"media/mariotoolbox.ogg",
 		"media/overworld.ogg",
 		"media/overworld_edit.ogg",
