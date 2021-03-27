@@ -27943,6 +27943,404 @@ cr.plugins_.rojoPaster = function(runtime)
 }());
 ;
 ;
+cr.behaviors.DragnDrop = function(runtime)
+{
+	this.runtime = runtime;
+	var self = this;
+	if (!this.runtime.isDomFree)
+	{
+		jQuery(document).mousemove(
+			function(info) {
+				self.onMouseMove(info);
+			}
+		);
+		jQuery(document).mousedown(
+			function(info) {
+				self.onMouseDown(info);
+			}
+		);
+		jQuery(document).mouseup(
+			function(info) {
+				self.onMouseUp(info);
+			}
+		);
+	}
+	var elem = (this.runtime.fullscreen_mode > 0) ? document : this.runtime.canvas;
+	if (this.runtime.isDirectCanvas)
+		elem = window["Canvas"];
+	else if (this.runtime.isCocoonJs)
+		elem = window;
+	if (typeof PointerEvent !== "undefined")
+	{
+		elem.addEventListener("pointerdown",
+			function(info) {
+				self.onPointerStart(info);
+			},
+			false
+		);
+		elem.addEventListener("pointermove",
+			function(info) {
+				self.onPointerMove(info);
+			},
+			false
+		);
+		elem.addEventListener("pointerup",
+			function(info) {
+				self.onPointerEnd(info);
+			},
+			false
+		);
+		elem.addEventListener("pointercancel",
+			function(info) {
+				self.onPointerEnd(info);
+			},
+			false
+		);
+	}
+	else if (window.navigator["msPointerEnabled"])
+	{
+		elem.addEventListener("MSPointerDown",
+			function(info) {
+				self.onPointerStart(info);
+			},
+			false
+		);
+		elem.addEventListener("MSPointerMove",
+			function(info) {
+				self.onPointerMove(info);
+			},
+			false
+		);
+		elem.addEventListener("MSPointerUp",
+			function(info) {
+				self.onPointerEnd(info);
+			},
+			false
+		);
+		elem.addEventListener("MSPointerCancel",
+			function(info) {
+				self.onPointerEnd(info);
+			},
+			false
+		);
+	}
+	else
+	{
+		elem.addEventListener("touchstart",
+			function(info) {
+				self.onTouchStart(info);
+			},
+			false
+		);
+		elem.addEventListener("touchmove",
+			function(info) {
+				self.onTouchMove(info);
+			},
+			false
+		);
+		elem.addEventListener("touchend",
+			function(info) {
+				self.onTouchEnd(info);
+			},
+			false
+		);
+		elem.addEventListener("touchcancel",
+			function(info) {
+				self.onTouchEnd(info);
+			},
+			false
+		);
+	}
+};
+(function ()
+{
+	var behaviorProto = cr.behaviors.DragnDrop.prototype;
+	var dummyoffset = {left: 0, top: 0};
+	function GetDragDropBehavior(inst)
+	{
+		var i, len;
+		for (i = 0, len = inst.behavior_insts.length; i < len; i++)
+		{
+			if (inst.behavior_insts[i] instanceof behaviorProto.Instance)
+				return inst.behavior_insts[i];
+		}
+		return null;
+	};
+	behaviorProto.onMouseDown = function (info)
+	{
+		if (info.which !== 1)
+			return;		// not left mouse button
+		this.onInputDown("leftmouse", info.pageX, info.pageY);
+	};
+	behaviorProto.onMouseMove = function (info)
+	{
+		if (info.which !== 1)
+			return;		// not left mouse button
+		this.onInputMove("leftmouse", info.pageX, info.pageY);
+	};
+	behaviorProto.onMouseUp = function (info)
+	{
+		if (info.which !== 1)
+			return;		// not left mouse button
+		this.onInputUp("leftmouse");
+	};
+	behaviorProto.onTouchStart = function (info)
+	{
+		if (info.preventDefault && cr.isCanvasInputEvent(info))
+			info.preventDefault();
+		var i, len, t, id;
+		for (i = 0, len = info.changedTouches.length; i < len; i++)
+		{
+			t = info.changedTouches[i];
+			id = t.identifier;
+			this.onInputDown(id ? id.toString() : "<none>", t.pageX, t.pageY);
+		}
+	};
+	behaviorProto.onTouchMove = function (info)
+	{
+		if (info.preventDefault)
+			info.preventDefault();
+		var i, len, t, id;
+		for (i = 0, len = info.changedTouches.length; i < len; i++)
+		{
+			t = info.changedTouches[i];
+			id = t.identifier;
+			this.onInputMove(id ? id.toString() : "<none>", t.pageX, t.pageY);
+		}
+	};
+	behaviorProto.onTouchEnd = function (info)
+	{
+		if (info.preventDefault && cr.isCanvasInputEvent(info))
+			info.preventDefault();
+		var i, len, t, id;
+		for (i = 0, len = info.changedTouches.length; i < len; i++)
+		{
+			t = info.changedTouches[i];
+			id = t.identifier;
+			this.onInputUp(id ? id.toString() : "<none>");
+		}
+	};
+	behaviorProto.onPointerStart = function (info)
+	{
+		if (info["pointerType"] === info["MSPOINTER_TYPE_MOUSE"] || info["pointerType"] === "mouse")
+			return;
+		if (info.preventDefault && cr.isCanvasInputEvent(info))
+			info.preventDefault();
+		this.onInputDown(info["pointerId"].toString(), info.pageX, info.pageY);
+	};
+	behaviorProto.onPointerMove = function (info)
+	{
+		if (info["pointerType"] === info["MSPOINTER_TYPE_MOUSE"] || info["pointerType"] === "mouse")
+			return;
+		if (info.preventDefault)
+			info.preventDefault();
+		this.onInputMove(info["pointerId"].toString(), info.pageX, info.pageY);
+	};
+	behaviorProto.onPointerEnd = function (info)
+	{
+		if (info["pointerType"] === info["MSPOINTER_TYPE_MOUSE"] || info["pointerType"] === "mouse")
+			return;
+		if (info.preventDefault && cr.isCanvasInputEvent(info))
+			info.preventDefault();
+		this.onInputUp(info["pointerId"].toString());
+	};
+	behaviorProto.onInputDown = function (src, pageX, pageY)
+	{
+		var offset = this.runtime.isDomFree ? dummyoffset : jQuery(this.runtime.canvas).offset();
+		var x = pageX - offset.left;
+		var y = pageY - offset.top;
+		var lx, ly, topx, topy;
+		var arr = this.my_instances.valuesRef();
+		var i, len, b, inst, topmost = null;
+		for (i = 0, len = arr.length; i < len; i++)
+		{
+			inst = arr[i];
+			b = GetDragDropBehavior(inst);
+			if (!b.enabled || b.dragging)
+				continue;		// don't consider disabled or already-dragging instances
+			lx = inst.layer.canvasToLayer(x, y, true);
+			ly = inst.layer.canvasToLayer(x, y, false);
+			inst.update_bbox();
+			if (!inst.contains_pt(lx, ly))
+				continue;		// don't consider instances not over this point
+			if (!topmost)
+			{
+				topmost = inst;
+				topx = lx;
+				topy = ly;
+				continue;
+			}
+			if (inst.layer.index > topmost.layer.index)
+			{
+				topmost = inst;
+				topx = lx;
+				topy = ly;
+				continue;
+			}
+			if (inst.layer.index === topmost.layer.index && inst.get_zindex() > topmost.get_zindex())
+			{
+				topmost = inst;
+				topx = lx;
+				topy = ly;
+				continue;
+			}
+		}
+		if (topmost)
+			GetDragDropBehavior(topmost).onDown(src, topx, topy);
+	};
+	behaviorProto.onInputMove = function (src, pageX, pageY)
+	{
+		var offset = this.runtime.isDomFree ? dummyoffset : jQuery(this.runtime.canvas).offset();
+		var x = pageX - offset.left;
+		var y = pageY - offset.top;
+		var lx, ly;
+		var arr = this.my_instances.valuesRef();
+		var i, len, b, inst;
+		for (i = 0, len = arr.length; i < len; i++)
+		{
+			inst = arr[i];
+			b = GetDragDropBehavior(inst);
+			if (!b.enabled || !b.dragging || (b.dragging && b.dragsource !== src))
+				continue;		// don't consider disabled, not-dragging, or dragging by other sources
+			lx = inst.layer.canvasToLayer(x, y, true);
+			ly = inst.layer.canvasToLayer(x, y, false);
+			b.onMove(lx, ly);
+		}
+	};
+	behaviorProto.onInputUp = function (src)
+	{
+		var arr = this.my_instances.valuesRef();
+		var i, len, b, inst;
+		for (i = 0, len = arr.length; i < len; i++)
+		{
+			inst = arr[i];
+			b = GetDragDropBehavior(inst);
+			if (b.dragging && b.dragsource === src)
+				b.onUp();
+		}
+	};
+	behaviorProto.Type = function(behavior, objtype)
+	{
+		this.behavior = behavior;
+		this.objtype = objtype;
+		this.runtime = behavior.runtime;
+	};
+	var behtypeProto = behaviorProto.Type.prototype;
+	behtypeProto.onCreate = function()
+	{
+	};
+	behaviorProto.Instance = function(type, inst)
+	{
+		this.type = type;
+		this.behavior = type.behavior;
+		this.inst = inst;				// associated object instance to modify
+		this.runtime = type.runtime;
+	};
+	var behinstProto = behaviorProto.Instance.prototype;
+	behinstProto.onCreate = function()
+	{
+		this.dragging = false;
+		this.dx = 0;
+		this.dy = 0;
+		this.dragsource = "<none>";
+		this.axes = this.properties[0];
+		this.enabled = (this.properties[1] !== 0);
+	};
+	behinstProto.saveToJSON = function ()
+	{
+		return { "enabled": this.enabled };
+	};
+	behinstProto.loadFromJSON = function (o)
+	{
+		this.enabled = o["enabled"];
+		this.dragging = false;
+	};
+	behinstProto.onDown = function(src, x, y)
+	{
+		this.dx = x - this.inst.x;
+		this.dy = y - this.inst.y;
+		this.dragging = true;
+		this.dragsource = src;
+		this.runtime.isInUserInputEvent = true;
+		this.runtime.trigger(cr.behaviors.DragnDrop.prototype.cnds.OnDragStart, this.inst);
+		this.runtime.isInUserInputEvent = false;
+	};
+	behinstProto.onMove = function(x, y)
+	{
+		var newx = x - this.dx;
+		var newy = y - this.dy;
+		if (this.axes === 0)		// both
+		{
+			if (this.inst.x !== newx || this.inst.y !== newy)
+			{
+				this.inst.x = newx;
+				this.inst.y = newy;
+				this.inst.set_bbox_changed();
+			}
+		}
+		else if (this.axes === 1)	// horizontal
+		{
+			if (this.inst.x !== newx)
+			{
+				this.inst.x = newx;
+				this.inst.set_bbox_changed();
+			}
+		}
+		else if (this.axes === 2)	// vertical
+		{
+			if (this.inst.y !== newy)
+			{
+				this.inst.y = newy;
+				this.inst.set_bbox_changed();
+			}
+		}
+	};
+	behinstProto.onUp = function()
+	{
+		this.dragging = false;
+		this.runtime.isInUserInputEvent = true;
+		this.runtime.trigger(cr.behaviors.DragnDrop.prototype.cnds.OnDrop, this.inst);
+		this.runtime.isInUserInputEvent = false;
+	};
+	behinstProto.tick = function ()
+	{
+	};
+	function Cnds() {};
+	Cnds.prototype.IsDragging = function ()
+	{
+		return this.dragging;
+	};
+	Cnds.prototype.OnDragStart = function ()
+	{
+		return true;
+	};
+	Cnds.prototype.OnDrop = function ()
+	{
+		return true;
+	};
+	Cnds.prototype.IsEnabled = function ()
+	{
+		return !!this.enabled;
+	};
+	behaviorProto.cnds = new Cnds();
+	function Acts() {};
+	Acts.prototype.SetEnabled = function (s)
+	{
+		this.enabled = (s !== 0);
+		if (!this.enabled)
+			this.dragging = false;
+	};
+	Acts.prototype.Drop = function ()
+	{
+		if (this.dragging)
+			this.onUp();
+	};
+	behaviorProto.acts = new Acts();
+	function Exps() {};
+	behaviorProto.exps = new Exps();
+}());
+;
+;
 cr.behaviors.Sin = function(runtime)
 {
 	this.runtime = runtime;
@@ -28250,30 +28648,32 @@ cr.behaviors.Sin = function(runtime)
 }());
 cr.getObjectRefTable = function () { return [
 	cr.plugins_.NinePatch,
-	cr.plugins_.Function,
-	cr.plugins_.Keyboard,
-	cr.plugins_.Mouse,
+	cr.plugins_.filechooser,
 	cr.plugins_.gamepad,
+	cr.plugins_.Keyboard,
 	cr.plugins_.List,
+	cr.plugins_.Mouse,
 	cr.plugins_.Audio,
+	cr.plugins_.Function,
 	cr.plugins_.Dictionary,
 	cr.plugins_.Button,
-	cr.plugins_.filechooser,
 	cr.plugins_.Browser,
+	cr.plugins_.Tilemap,
+	cr.plugins_.Sprite,
 	cr.plugins_.Spritefont2,
 	cr.plugins_.TiledBg,
-	cr.plugins_.WebStorage,
 	cr.plugins_.Touch,
-	cr.plugins_.Sprite,
-	cr.plugins_.Tilemap,
+	cr.plugins_.WebStorage,
 	cr.plugins_.rojoPaster,
 	cr.behaviors.Sin,
+	cr.behaviors.DragnDrop,
 	cr.system_object.prototype.cnds.OnLayoutStart,
 	cr.plugins_.Mouse.prototype.acts.SetCursor,
 	cr.plugins_.Audio.prototype.acts.StopAll,
 	cr.system_object.prototype.acts.SetVar,
 	cr.plugins_.Audio.prototype.acts.Play,
 	cr.plugins_.Tilemap.prototype.acts.LoadFromJSON,
+	cr.plugins_.Sprite.prototype.acts.SetPos,
 	cr.plugins_.Sprite.prototype.acts.SetPosToObject,
 	cr.plugins_.Tilemap.prototype.acts.Destroy,
 	cr.system_object.prototype.cnds.Compare,
@@ -28304,7 +28704,6 @@ cr.getObjectRefTable = function () { return [
 	cr.plugins_.Sprite.prototype.cnds.IsOverlapping,
 	cr.plugins_.Sprite.prototype.acts.SetY,
 	cr.plugins_.Sprite.prototype.exps.Y,
-	cr.plugins_.Sprite.prototype.acts.SetPos,
 	cr.system_object.prototype.acts.ScrollX,
 	cr.plugins_.Sprite.prototype.exps.X,
 	cr.system_object.prototype.cnds.IsGroupActive,
@@ -28330,7 +28729,7 @@ cr.getObjectRefTable = function () { return [
 	cr.plugins_.Tilemap.prototype.acts.EraseTile,
 	cr.plugins_.Sprite.prototype.cnds.CompareY,
 	cr.plugins_.Audio.prototype.acts.SetPlaybackRate,
-	cr.plugins_.Audio.prototype.cnds.OnEnded,
+	cr.plugins_.Audio.prototype.cnds.IsTagPlaying,
 	cr.system_object.prototype.exps["int"],
 	cr.system_object.prototype.exps.tokenat,
 	cr.system_object.prototype.cnds.ForEach,
@@ -28395,6 +28794,8 @@ cr.getObjectRefTable = function () { return [
 	cr.plugins_.Mouse.prototype.cnds.IsOverObject,
 	cr.plugins_.Sprite.prototype.cnds.OnCreated,
 	cr.plugins_.Tilemap.prototype.cnds.IsOnScreen,
+	cr.plugins_.Mouse.prototype.cnds.OnObjectClicked,
+	cr.plugins_.Browser.prototype.acts.InvokeDownloadString,
 	cr.plugins_.WebStorage.prototype.acts.StoreLocal,
 	cr.plugins_.Spritefont2.prototype.cnds.IsBoolInstanceVarSet,
 	cr.system_object.prototype.exps.layoutname,
@@ -28411,5 +28812,20 @@ cr.getObjectRefTable = function () { return [
 	cr.plugins_.Sprite.prototype.exps.Opacity,
 	cr.plugins_.NinePatch.prototype.acts.SetOpacity,
 	cr.plugins_.NinePatch.prototype.exps.Opacity,
-	cr.plugins_.Browser.prototype.cnds.OnUpdateFound
+	cr.plugins_.Browser.prototype.cnds.OnUpdateFound,
+	cr.plugins_.Spritefont2.prototype.acts.SetInstanceVar,
+	cr.plugins_.NinePatch.prototype.acts.SetInstanceVar,
+	cr.plugins_.NinePatch.prototype.exps.Y,
+	cr.plugins_.Tilemap.prototype.acts.SetVisible,
+	cr.plugins_.Tilemap.prototype.cnds.CompareX,
+	cr.behaviors.DragnDrop.prototype.cnds.IsDragging,
+	cr.plugins_.Spritefont2.prototype.cnds.CompareY,
+	cr.plugins_.Function.prototype.exps.Call,
+	cr.plugins_.Sprite.prototype.acts.ToggleBoolInstanceVar,
+	cr.plugins_.Function.prototype.cnds.CompareParam,
+	cr.plugins_.Function.prototype.acts.SetReturnValue,
+	cr.plugins_.NinePatch.prototype.cnds.CompareY,
+	cr.plugins_.NinePatch.prototype.acts.SetY,
+	cr.plugins_.NinePatch.prototype.cnds.IsBoolInstanceVarSet,
+	cr.plugins_.NinePatch.prototype.cnds.CompareInstanceVar
 ];};

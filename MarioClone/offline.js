@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1616460404,
+	"version": 1616807850,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -24,8 +24,6 @@
 		"images/dialougebox.png",
 		"images/particle.png",
 		"images/hand-sheet0.png",
-		"images/hand-sheet1.png",
-		"images/hand-sheet2.png",
 		"images/blockhit-sheet0.png",
 		"images/loadingbarback.png",
 		"images/loadingbar-sheet0.png",
@@ -37,6 +35,7 @@
 		"images/systemspawner-sheet0.png",
 		"images/luigisprites.png",
 		"images/splash-sheet0.png",
+		"images/scrollbar.png",
 		"media/smb_1-up.ogg",
 		"media/smb_breakblock.ogg",
 		"media/smb_bump.ogg",
@@ -61,6 +60,7 @@
 		"media/mariotoolbox.ogg",
 		"media/overworld.ogg",
 		"media/overworld_edit.ogg",
+		"media/superstar.ogg",
 		"icon-16.png",
 		"icon-32.png",
 		"icon-114.png",
