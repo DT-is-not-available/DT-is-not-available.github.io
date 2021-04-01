@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1617272776,
+	"version": 1617298482,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -29,7 +29,6 @@
 		"images/loadingbar-sheet0.png",
 		"images/loadinganimation-sheet0.png",
 		"images/loadinganimation-sheet1.png",
-		"images/loadinganimation-sheet2.png",
 		"images/mariomarker-sheet0.png",
 		"images/mariosprites.png",
 		"images/projectiles.png",
