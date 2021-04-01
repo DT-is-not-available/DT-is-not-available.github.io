@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1616807850,
+	"version": 1617272776,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -29,6 +29,7 @@
 		"images/loadingbar-sheet0.png",
 		"images/loadinganimation-sheet0.png",
 		"images/loadinganimation-sheet1.png",
+		"images/loadinganimation-sheet2.png",
 		"images/mariomarker-sheet0.png",
 		"images/mariosprites.png",
 		"images/projectiles.png",
@@ -36,6 +37,8 @@
 		"images/luigisprites.png",
 		"images/splash-sheet0.png",
 		"images/scrollbar.png",
+		"images/markerimg.png",
+		"images/markerui.png",
 		"media/smb_1-up.ogg",
 		"media/smb_breakblock.ogg",
 		"media/smb_bump.ogg",
@@ -66,6 +69,8 @@
 		"icon-114.png",
 		"icon-128.png",
 		"icon-256.png",
-		"loading-logo.png"
+		"loading-logo.png",
+		"template 1.lvl",
+		"blank level.lvl"
 	]
 }
