@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1620692503,
+	"version": 1625709966,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -79,31 +79,7 @@
 		"loading-logo.png",
 		"template 1.lvl",
 		"template 2.lvl",
-		"smb-1.png",
-		"smb-0.png",
 		"themes.txt",
-		"sprites-1.png",
-		"sprites-0.png",
-		"particles-1.png",
-		"particles-0.png",
-		"particles-2.png",
-		"sprites-2.png",
-		"smb-2.png",
-		"particles-3.png",
-		"sprites-3.png",
-		"smb-3.png",
-		"bg-3.png",
-		"bg-2.png",
-		"bg-1.png",
-		"bg-0.png",
-		"particles-4.png",
-		"smb-4.png",
-		"sprites-4.png",
-		"bg-4.png",
-		"smb-5.png",
-		"particles-5.png",
-		"bg-5.png",
-		"sprites-5.png",
 		"blank level.lvl"
 	]
 }
