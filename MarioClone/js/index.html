@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <link href='https://fonts.googleapis.com/css?family=Press Start 2P' rel='stylesheet'>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Mario Toolbox JS</title>
+  </head>
+  <body>
+	<canvas id="canvas" width="256" height="240" onblur="resetkeys()">
+	<p>Sorry, but this browser is unable to display the game window due to it being outdated. Please try using a new browser like Chrome, Firefox, or Opera GX. Do not use internet explorer because it will most likely not work.</p>
+	</canvas>
+	<script>
+window.addEventListener("error",function(err) {
+	var errorMessage = "" + err.message + " - " + err.filename + " - line " + err.lineno + " - col " + err.colno;
+	console.error("Oh no, an error occured:\n" + errorMessage);
+	Analytics.sendErrorEvent(errorMessage);
+});
+	</script>
+    <script src="javascript/util.js"></script>
+    <script src="javascript/tilemap_draw.js"></script>
+    <script src="javascript/main.js"></script>
+    <script src="javascript/classes/mario.js"></script>
+    <script src="javascript/classes/generic_entity.js"></script>
+    <script src="setup.js"></script>
+	<button type="button" class="collapsible">⚙</button>
+	<div class="settings">
+	  <p>GAME SCALE</p>
+	  <button onclick="setScale(1)">1</button>
+	  <button onclick="setScale(2)">2</button>
+	  <button onclick="setScale(3)">3</button>
+	  <button onclick="setScale(4)">4</button>
+	  <p></p>
+	  <button onclick="setScaleAuto()">Auto</button>
+	  <button onclick="setScaleFit()">Fit</button>
+	  <p id="dispfps">FPS: </p>
+	  <div class="rangeslider">
+		<input type="range" min="30" max="240" value="60" step="15" class="fpsslider" id="fpsslider"></input>
+	  </div>
+	  <script>
+var fpsslider = document.getElementById("fpsslider");
+var fpsoutput = document.getElementById("dispfps");
+fpsoutput.innerHTML = "FPS: "+60;
+
+fpsslider.oninput = function() {
+	if (this.value == 255) {
+		fpsoutput.innerHTML = "FPS: UNLIMITED";
+		fps = 1000;
+	}else{
+		fpsoutput.innerHTML = "FPS: "+this.value;
+		fps = this.value;
+	}
+}
+	  </script>
+	  <p id="dispspeed">SPEED: </p>
+	  <div class="rangeslider">
+		<input type="range" min="5" max="100" value="100" step="5" class="speedslider" id="speedslider"></input>
+	  </div>
+	  <script>
+var speedslider = document.getElementById("speedslider");
+var speedoutput = document.getElementById("dispspeed");
+speedoutput.innerHTML = "SPEED: 100%";
+
+speedslider.oninput = function() {
+	speedoutput.innerHTML = "SPEED: "+this.value+"%";
+	timemod = this.value/100;
+}
+	  </script>
+	  <p>DEBUG:</p>
+	  <p class="debug">DEBUG</p>
+	  <p class="debug">DEBUG</p>
+	  <p class="debug">DEBUG</p>
+	  <p class="debug">DEBUG</p>
+	  <p class="debug">DEBUG</p>
+	  <p class="debug">DEBUG</p>
+	</div>
+	<script>
+var coll = document.getElementsByClassName("collapsible");
+var content = document.getElementsByClassName("collapsible").nextElementSibling;
+coll[0].addEventListener("click", function() {
+  this.classList.toggle("active");
+  var content = this.nextElementSibling;
+  if (content.style.display === "block") {
+    content.style.display = "none";
+  } else {
+    content.style.display = "block";
+  }
+});
+	</script>
+  </body>
+</html>
