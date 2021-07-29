@@ -29,11 +29,11 @@ class Generic_entity_class {
 			this.y = Math.round((this.y+8)/16)*16-2
 			this.onceil = true
 		}
-		if ((this.xv < 0 && typeof(level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-22)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-22)/16)]].collision.ceiling) || (this.xv < 0 && typeof(level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-10)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-10)/16)]].collision.ceiling)) {
+		if ((this.xv < 0 && typeof(level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-22)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-22)/16)]].collision.left) || (this.xv < 0 && typeof(level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-10)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-14)/16)+","+Math.round((this.y-10)/16)]].collision.left)) {
 			this.x = Math.round((this.x-14)/16+1)*16+6
 			this.xv = 0
 		}
-		if ((this.xv > 0 && typeof(level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-22)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-22)/16)]].collision.ceiling) || (this.xv < 0 && typeof(level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-10)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-10)/16)]].collision.ceiling)) {
+		if ((this.xv > 0 && typeof(level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-22)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-22)/16)]].collision.right) || (this.xv > 0 && typeof(level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-10)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-2)/16)+","+Math.round((this.y-10)/16)]].collision.right)) {
 			this.x = Math.round((this.x-14)/16)*16+10
 			this.xv = 0
 		}

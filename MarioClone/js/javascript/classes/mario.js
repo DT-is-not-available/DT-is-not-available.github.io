@@ -7,9 +7,14 @@ class Mario_Class {
 		this.jumptimer = 0
 		this.img_hitbox = {X_neg: 16, X_pos: 16, Y_neg: 32, Y_pos: 0}
 		this.speedcap = 12
+		this.walkanim = 0
 	}
 	game() {
 		this.entity.game()
+		if (this.entity.onfloor && !Math.round(this.entity.xv) == 0) {
+			this.walkanim = mod(this.walkanim+(this.entity.xv/150), 3)
+			this.frame = 2+Math.trunc(this.walkanim)
+		}
 		if (keyboard.Space && this.jumptimer > 0) {
 			if (this.jumptimer > 0) {this.entity.yv = -4}
 			if (this.jumptimer > 15) {this.entity.yv = -12}
@@ -19,10 +24,18 @@ class Mario_Class {
 		if (keyboard.D) {
 			this.entity.xv += 0.12
 			if (keyboard.Shift && this.entity.onfloor) this.entity.xv += 0.03
+			if (this.entity.onfloor && !keyboard.A && this.entity.xv < 0) {
+				this.entity.xv += 0.03
+				this.frame = 5
+			}
 		}
 		if (keyboard.A) {
 			this.entity.xv -= 0.12
 			if (keyboard.Shift && this.entity.onfloor) this.entity.xv -= 0.03
+			if (this.entity.onfloor && !keyboard.D && this.entity.xv > 0) {
+				this.entity.xv -= 0.03
+				this.frame = 5
+			}
 		}
 		if (((!keyboard.A && !keyboard.D) || (keyboard.A && keyboard.D)) && Math.round(this.entity.xv) == 0) {
 			this.entity.xv = 0
@@ -54,9 +67,9 @@ class Mario_Class {
 		if (this.entity.onfloor && !keyboard.Space) {
 			this.jumptimer = 79 + Math.abs(this.entity.xv)/2.5
 		}
-		if (this.entity.onfloor && keyboard.D) {
+		if (this.entity.onfloor && keyboard.D && !keyboard.A) {
 			this.mirror = false
-		}else if (this.entity.onfloor && keyboard.A) {
+		}else if (this.entity.onfloor && keyboard.A && !keyboard.D) {
 			this.mirror = true
 		}
 		if (this.entity.x < camera_x+6) {

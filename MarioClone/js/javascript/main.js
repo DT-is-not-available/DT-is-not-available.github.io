@@ -1,6 +1,7 @@
 function startGame() {
 	camera_x = 0;
 	camera_y = 0;
+	tileanim_timer = 0;
 	Mario = undefined
 	delete(Mario)
 	Mario = new Mario_Class(24,0)
@@ -22,6 +23,8 @@ function update() {
 	
 	//game logic
 	Mario.game();
+	
+	tileanim_timer += 0.035
 	
 	if (camera_x < 0)
 		camera_x = 0

@@ -10,6 +10,8 @@ function onscreen(hitbox_1, x_p, y_p) {
 	}
 }
 
+function mod(x, y) {return x - y * Math.floor(x / y)}
+
 function overlap(hitbox_1, x_1, y_1, hitbox_2, x_2, y_2) {
 	if (x_p+hitbox_1.X_pos >= camera_x && x_p-hitbox_1.X_neg <= camera_x+256 && y_p+hitbox_1.Y_pos >= camera_y && y_p-hitbox_1.Y_neg <= camera_y+240) {
 		return true

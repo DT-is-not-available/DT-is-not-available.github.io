@@ -29,23 +29,27 @@
 		"animation": [
 			{
 				"frameX": 0,
-				"frameY": 0,
-				"frameDelay": 498
+				"frameY": 0
+			},
+			{
+				"frameX": 0,
+				"frameY": 0
+			},
+			{
+				"frameX": 0,
+				"frameY": 0
 			},
 			{
 				"frameX": 16,
-				"frameY": 0,
-				"frameDelay": 166
+				"frameY": 0
 			},
 			{
 				"frameX": 32,
-				"frameY": 0,
-				"frameDelay": 166
+				"frameY": 0
 			},
 			{
 				"frameX": 16,
-				"frameY": 0,
-				"frameDelay": 166
+				"frameY": 0
 			}
 		],
 		"tileX": 11,
