@@ -1,0 +1,95 @@
+[
+	{
+		"collision": {
+			"floor": true,
+			"ceiling": true,
+			"left": true,
+			"right": true
+		},
+		"interaction": false,
+		"animation": false,
+		"tileX": 0,
+		"tileY": 0
+	},
+	{
+		"collision": {
+			"floor": true,
+			"ceiling": true,
+			"left": true,
+			"right": true
+		},
+		"interaction": {
+			"floor": true,
+			"ceiling": true,
+			"hasCoin": true,
+			"hitTile": 2,
+			"breakable": false,
+			"isContainer": true
+		},
+		"animation": [
+			{
+				"frameX": 0,
+				"frameY": 0,
+				"frameDelay": 498
+			},
+			{
+				"frameX": 16,
+				"frameY": 0,
+				"frameDelay": 166
+			},
+			{
+				"frameX": 32,
+				"frameY": 0,
+				"frameDelay": 166
+			},
+			{
+				"frameX": 16,
+				"frameY": 0,
+				"frameDelay": 166
+			}
+		],
+		"tileX": 11,
+		"tileY": 0
+	},
+	{
+		"collision": {
+			"floor": true,
+			"ceiling": true,
+			"left": true,
+			"right": true
+		},
+		"interaction": false,
+		"animation": false,
+		"tileX": 12,
+		"tileY": 0
+	},
+	{
+		"collision": {
+			"floor": true,
+			"ceiling": true,
+			"left": true,
+			"right": true
+		},
+		"interaction": {
+			"hasCoin": false,
+			"hitTile": 2,
+			"breakable": true,
+			"isContainer": true
+		},
+		"animation": false,
+		"tileX": 1,
+		"tileY": 0
+	},
+	{
+		"collision": {
+			"floor": true,
+			"ceiling": false,
+			"left": false,
+			"right": false
+		},
+		"interaction": false,
+		"animation": false,
+		"tileX": 1,
+		"tileY": 1
+	}
+]
