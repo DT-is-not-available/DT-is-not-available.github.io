@@ -1,11 +1,11 @@
 ﻿{
-	"version": 1625709966,
+	"version": 1627671473,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
 		"jquery-3.4.1.min.js",
 		"offlineClient.js",
-		"images/collision.png",
+		"images/tiledata.png",
 		"images/player-sheet0.png",
 		"images/baddie-sheet0.png",
 		"images/baddie-sheet1.png",
@@ -24,6 +24,7 @@
 		"images/dialougebox.png",
 		"images/particle.png",
 		"images/hand-sheet0.png",
+		"images/hand-sheet1.png",
 		"images/blockhit-sheet0.png",
 		"images/loadingbarback.png",
 		"images/loadingbar-sheet0.png",
