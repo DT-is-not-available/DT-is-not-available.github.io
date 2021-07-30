@@ -26,7 +26,7 @@ window.addEventListener("error",function(err) {
     <script src="javascript/classes/generic_entity.js"></script>
     <script src="javascript/classes/text.js"></script>
     <script src="setup.js"></script>
-	<button type="button" class="collapsible">SETTINGS</button>
+	<button type="button" class="collapsible" onclick="this.blur();">SETTINGS</button>
 	<div class="settings">
 	  <p>GAME SCALE</p>
 	  <button onclick="setScale(1)">1</button>
@@ -57,7 +57,7 @@ fpsslider.oninput = function() {
 	  </script>
 	</div>
 	<p></p>
-	<button type="button" class="collapsible2">DEBUG</button>
+	<button type="button" class="collapsible2" onclick="this.blur();">DEBUG</button>
 	<div class="settings">
 	  <p class="debug">NULL</p>
 	  <p class="debug">NULL</p>
@@ -79,10 +79,10 @@ speedslider.oninput = function() {
 	timemod = this.value/100;
 }
 	  </script>
-	  <button onclick="Mario.dead = true">KILL MARIO</button><br><p>
-	  <button onclick="g_layer.menu();">g_layer.menu</button><br>
-	  <button onclick="g_layer.game();">g_layer.game</button><br>
-	  <button onclick="g_layer.edit();">g_layer.edit</button>
+	  <button onclick="Mario.dead = true; this.blur();">KILL MARIO</button><br><p>
+	  <button onclick="g_layer.menu(); this.blur();">g_layer.menu</button><br>
+	  <button onclick="g_layer.game(); this.blur();">g_layer.game</button><br>
+	  <button onclick="g_layer.edit(); this.blur();">g_layer.edit</button>
 	</div>
 	<script>
 var coll = document.getElementsByClassName("collapsible");
