@@ -4,6 +4,7 @@ const debug = document.getElementsByClassName('debug');
 var fps = 60
 var timemod = 1;
 keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+loopStarted = false
 
 setScaleAuto();
 
@@ -32,7 +33,7 @@ xhttp.onreadystatechange = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		console.log("JSON Contents:");
 		console.log(JSON.parse(this.responseText));
-		enemies = JSON.parse(this.responseText);
+		enemy_defs = JSON.parse(this.responseText);
 		filesLoaded += 1
 		if (filesLoaded >= filesNeeded) {
 			startGame();

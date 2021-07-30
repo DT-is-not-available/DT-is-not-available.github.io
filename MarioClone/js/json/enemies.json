@@ -1,8 +1,30 @@
 {
+	"inherit": {
+		"speed": 0.5,
+		"kills": true,
+		"canStomp": true,
+		"gravity": 0.5,
+		"animation": [
+			{
+				"frameX": 0,
+				"frameY": 0
+			},
+			{
+				"frameX": 16,
+				"frameY": 0
+			}
+		],
+		"animationFPS": 6,
+		"deathAnimation": true,
+		"deathFrame": {
+			"frameX": 32,
+			"frameY": 0
+		}
+	},
 	"goomba": {
-		
+		"deathAnimation": true
 	},
 	"bullet_bill": {
-		
+		"gravity": 0
 	}
 }

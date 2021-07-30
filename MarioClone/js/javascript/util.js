@@ -3,21 +3,24 @@ function resetkeys() {
 }
 
 function onscreen(hitbox_1, x_p, y_p) {
-	if (x_p+hitbox_1.X_pos >= camera_x && x_p-hitbox_1.X_neg <= camera_x+256 && y_p+hitbox_1.Y_pos >= camera_y && y_p-hitbox_1.Y_neg <= camera_y+240) {
-		return true
-	}else{
-		return false
-	}
+	return overlap(hitbox_1, x_p, y_p, {X_pos: 256, X_neg: 0, Y_pos: 240, Y_neg: 0}, Math.round(camera_x), Math.round(camera_y))
 }
 
 function mod(x, y) {return x - y * Math.floor(x / y)}
 
-function overlap(hitbox_1, x_1, y_1, hitbox_2, x_2, y_2) {
-	if (x_p+hitbox_1.X_pos >= camera_x && x_p-hitbox_1.X_neg <= camera_x+256 && y_p+hitbox_1.Y_pos >= camera_y && y_p-hitbox_1.Y_neg <= camera_y+240) {
-		return true
-	}else{
-		return false
-	}
+function overlap(r1, x1, y1, r2, x2, y2) {
+	left1 = x1-r1.X_neg
+	right1 = x1+r1.X_pos
+	top1 = y1-r1.Y_neg
+	bottom1 = y1+r1.Y_pos
+	left2 = x2-r2.X_neg
+	right2 = x2+r2.X_pos
+	top2 = y2-r2.Y_neg
+	bottom2 = y2+r2.Y_pos
+  return !(left2 >= right1 || 
+           right2 <= left1 || 
+           top2 >= bottom1 ||
+           bottom2 <= top1);
 }
 
 function setScale(amount) {
