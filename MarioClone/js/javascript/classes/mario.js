@@ -7,7 +7,7 @@ class Mario_Class {
 		this.mirror = false
 		this.dead = false
 		this.powerup = 0
-		this.frame = 0
+		this.frame = 4
 		this.jumptimer = 0
 		this.speedcap = 11
 		this.walkanim = 0
@@ -102,6 +102,7 @@ class Mario_Class {
 				this.entity.yv = -5
 			}
 		}
+		if (this.entity.y > camera_y+272) this.dead = true
 	}
 	draw() {
 		if (onscreen(this.img_hitbox, this.entity.rx, this.entity.ry)) {

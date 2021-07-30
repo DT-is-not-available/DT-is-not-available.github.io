@@ -16,8 +16,6 @@ class Generic_entity_class {
 		this.tilecollision = true
 	}
 	game() {
-		if (this.yv < 0) this.yv += this.up_gravity
-		this.yv += this.gravity
 		if (this.yv > 28) {
 			this.yv = 28
 		}
@@ -29,12 +27,12 @@ class Generic_entity_class {
 		this.x += this.xv/16
 		if (this.tilecollision) {
 			if ((this.yv >= 0 && typeof(level.tiles[Math.round((this.x-12)/16)+","+Math.round((this.y-8)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-12)/16)+","+Math.round((this.y-8)/16)]].collision.floor && level.tiles[Math.round((this.x-12)/16)+","+Math.round((this.y-8)/16)] === level.tiles[Math.round((this.x-12)/16)+","+Math.round((this.y+4)/16)]) || (this.yv >= 0 && typeof(level.tiles[Math.round((this.x-4)/16)+","+Math.round((this.y-8)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-4)/16)+","+Math.round((this.y-8)/16)]].collision.floor && level.tiles[Math.round((this.x-4)/16)+","+Math.round((this.y-8)/16)] == level.tiles[Math.round((this.x-4)/16)+","+Math.round((this.y+4)/16)])) {
-				this.yv = -0.5
+				this.yv = 0
 				this.y = Math.round((this.y-8)/16)*16
 				this.onfloor = true
 			}
 			if (!this.onfloor && this.yv < 0 && typeof(level.tiles[Math.round((this.x-8)/16)+","+Math.round((this.y-24)/16)]) != 'undefined' && tile_defs[level.tiles[Math.round((this.x-8)/16)+","+Math.round((this.y-24)/16)]].collision.ceiling) {
-				this.yv = 0.5
+				this.yv = 0
 				this.y = Math.round((this.y+8)/16)*16-2
 				this.onceil = true
 			}
@@ -55,6 +53,8 @@ class Generic_entity_class {
 				this.x -= 1
 			}
 		}
+		if (this.yv < 0) this.yv += this.up_gravity
+		this.yv += this.gravity
 		this.rx = Math.round(this.x)
 		this.ry = Math.round(this.y)
 	}

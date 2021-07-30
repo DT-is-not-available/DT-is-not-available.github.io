@@ -21,13 +21,14 @@ class Baddie_Class {
 		this.mirror = false
 		this.flip = false
 		this.animationTimer = 0
-		this.direction = 1
+		this.direction = -1
 		this.deathtimer = 0
 		this.dead = false
 		
 		//create the entity
 		this.entity = new Generic_entity_class(xpos, ypos, {X_neg: 4, X_pos: 4, Y_neg: 12, Y_pos: -4})
 		this.entity.gravity = this.gravity
+		this.entity.tilecollision = this.tilecollision
 	
 		//image hitbox for onscreen check
 		this.img_hitbox = {X_neg: 8, X_pos: 8, Y_neg: 16, Y_pos: 0}

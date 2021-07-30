@@ -48,6 +48,7 @@
 	"enemies": [
 		["goomba", 48, 48],
 		["goomba", 96, 48],
-		["goomba", 128, 48]
+		["goomba", 128, 48],
+		["bullet_bill", 128, 144]
 	]
 }

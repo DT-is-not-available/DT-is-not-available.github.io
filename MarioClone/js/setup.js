@@ -11,9 +11,10 @@ setScaleAuto();
 window.addEventListener('resize', setScaleAuto) 
 
 var filesLoaded = 0;
-const filesNeeded = 7;
+var filesNeeded = 10;
 
 var xhttp = new XMLHttpRequest();
+// new file
 xhttp.onreadystatechange = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		console.log("JSON Contents:");
@@ -29,6 +30,23 @@ xhttp.open("GET", "./json/tiles.json", true);
 xhttp.send();
 
 var xhttp = new XMLHttpRequest();
+// new file
+xhttp.onreadystatechange = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		console.log("JSON Contents:");
+		console.log(JSON.parse(this.responseText));
+		font_defs = JSON.parse(this.responseText);
+		filesLoaded += 1
+		if (filesLoaded >= filesNeeded) {
+			startGame();
+		}
+	}
+};
+xhttp.open("GET", "./json/text.json", true);
+xhttp.send();
+
+var xhttp = new XMLHttpRequest();
+// new file
 xhttp.onreadystatechange = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		console.log("JSON Contents:");
@@ -44,6 +62,7 @@ xhttp.open("GET", "./json/enemies.json", true);
 xhttp.send();
 
 var xhttp = new XMLHttpRequest();
+// new file
 xhttp.onreadystatechange = function() {
 	if (this.readyState == 4 && this.status == 200) {
 		console.log("JSON Contents:");
@@ -59,6 +78,7 @@ xhttp.open("GET", "./json/leveltest.json", true);
 xhttp.send();
 
 const img_tileset = new Image();
+// new file
 img_tileset.src = 'images/tileset.png';
 img_tileset.onload = function() {
     filesLoaded += 1
@@ -68,6 +88,7 @@ img_tileset.onload = function() {
 };
 
 const img_mario = new Image();
+// new file
 img_mario.src = 'images/mario.png';
 img_mario.onload = function() {
     filesLoaded += 1
@@ -77,6 +98,7 @@ img_mario.onload = function() {
 };
 
 const img_tileAnimation = new Image();
+// new file
 img_tileAnimation.src = 'images/tileAnimation.png';
 img_tileAnimation.onload = function() {
     filesLoaded += 1
@@ -86,8 +108,29 @@ img_tileAnimation.onload = function() {
 };
 
 const img_sprites = new Image();
+// new file
 img_sprites.src = 'images/sprites.png';
 img_sprites.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_title = new Image();
+// new file
+img_title.src = 'images/title.png';
+img_title.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_text = new Image();
+// new file
+img_text.src = 'images/text.png';
+img_text.onload = function() {
     filesLoaded += 1
 	if (filesLoaded >= filesNeeded) {
 		startGame();

@@ -19,12 +19,21 @@
 		"deathFrame": {
 			"frameX": 32,
 			"frameY": 0
-		}
+		},
+		"tilecollision": true
 	},
 	"goomba": {
-		"deathAnimation": true
 	},
 	"bullet_bill": {
-		"gravity": 0
+		"speed": 2,
+		"gravity": 0,
+		"deathAnimation": false,
+		"animation": [
+			{
+				"frameX": 48,
+				"frameY": 0
+			}
+		],
+		"tilecollision": false
 	}
 }
