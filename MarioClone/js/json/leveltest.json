@@ -1,9 +1,11 @@
 {
 	"marioX": 24,
-	"marioY": 0,
+	"marioY": 16,
 	"settings": {
-		"enemy_high_jump": true,
-		"camera": 0
+		"camera": 0,
+		"height": 0,
+		"width": 16,
+		"enemy_high_jump": true
 	},
 	"tiles": {
 		"0,13": 4,
@@ -49,6 +51,7 @@
 		["goomba", 48, 48],
 		["goomba", 96, 48],
 		["goomba", 128, 48],
+		["goomba", 144, 48],
 		["bullet_bill", 128, 144]
 	]
 }

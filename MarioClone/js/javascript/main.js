@@ -1,10 +1,14 @@
 class GameLayer_Class {
+	game() {
+		gameLayer = "game"
+		startGame()
+	}
 	game_update() {
 		
 		//mario
 		Mario.game();
 		
-		if (!Mario.dead){
+		if (!Mario.freezeWorld){
 			
 			//enemies
 			
@@ -21,12 +25,7 @@ class GameLayer_Class {
 							enemies[i].entity.gravity = 0.5
 						}
 					} else {
-						if (enemies[i].kills) Mario.dead = true
-					}
-				}
-				for (let i2 = 0; i2 < enemies.length; i2++) {
-					if (!enemies[i].dead && !enemies[i2].dead && overlap(enemies[i].entity.hitbox, enemies[i].entity.x, enemies[i].entity.y, enemies[i2].entity.hitbox, enemies[i2].entity.x, enemies[i2].entity.y)) {
-						
+						if (enemies[i].kills) Mario.damage()
 					}
 				}
 				if (enemies[i].delete) {
@@ -44,8 +43,14 @@ class GameLayer_Class {
 				camera_y = Mario.entity.y-128-48
 			if ((Mario.entity.y-128+48) < camera_y)
 				camera_y = Mario.entity.y-128+48
-			if (camera_y > 0)
+			if (camera_y < 0)
 				camera_y = 0
+			if (camera_y > level.settings.height*16)
+				camera_y = level.settings.height*16
+			if (camera_x < 0)
+				camera_x = 0
+			if (camera_x > level.settings.width*16)
+				camera_x = level.settings.width*16
 			
 		}
 		
@@ -56,9 +61,6 @@ class GameLayer_Class {
 		debug[4].innerHTML = "JT: "+Math.round(Mario.jumptimer)
 		debug[5].innerHTML = "F: "+Mario.entity.onfloor
 		
-		//confirms that game loop works
-		
-		//console.log("game loop complete");
 	}
 	game_draw() {
 		
@@ -76,18 +78,16 @@ class GameLayer_Class {
 		
 		Mario.draw();
 		
-		//confirms that render loop works
-		
-		//console.log("render loop complete");
 	}
-	game() {
-		gameLayer = "game"
+	menu() {
+		gameLayer = "menu"
 		startGame()
 	}
 	menu_update() {
 		camera_x = 0
 		camera_y = 0
-		if (keyboard.Space) gameLayer = "game"
+		if (keyboard_onpress.Space) gameLayer = "game"
+		if (keyboard_onpress.Enter) gameLayer = "edit"
 		window.title_y += window.title_yv/50
 		window.title_yv += -(Math.abs(window.title_y)/window.title_y)*0.01
 	}
@@ -102,32 +102,124 @@ class GameLayer_Class {
 		drawText(50, 176, "PRESS ENTER TO EDIT");
 		
 	}
-	menu() {
-		gameLayer = "menu"
+	edit() {
+		gameLayer = "edit"
 		startGame()
 	}
-	global_update() {}
+	edit_update() {
+		enemies = []
+		this.cameraspeed = 0.5
+		if (keyboard.Shift) this.cameraspeed += 1.5
+		if (keyboard.Space) this.cameraspeed += 3
+		if (keyboard.W) Mario.entity.y -= this.cameraspeed
+		if (keyboard.S) Mario.entity.y += this.cameraspeed
+		if (keyboard.A) {Mario.entity.x -= this.cameraspeed; Mario.mirror = true}
+		if (keyboard.D) {Mario.entity.x += this.cameraspeed; Mario.mirror = false}
+		if (!keyboard.W && !keyboard.S && !keyboard.A && !keyboard.D) {
+			Mario.entity.y = Math.round(Mario.entity.y/8)*8
+			Mario.entity.x = Math.round(Mario.entity.x/8)*8
+		}
+		Mario.entity.rx = Math.round(Mario.entity.x)
+		Mario.entity.ry = Math.round(Mario.entity.y)
+		camera_x = Mario.entity.x-128
+		camera_y = Mario.entity.y-128
+			if (camera_y < 0)
+				camera_y = 0
+			if (camera_y > level.settings.height*16)
+				camera_y = level.settings.height*16
+			if (camera_x < 0)
+				camera_x = 0
+			if (camera_x > level.settings.width*16)
+				camera_x = level.settings.width*16
+		Mario.frame = 0
+		Mario.freezeWorld = false
+		Mario.entity.xv = 0
+		Mario.entity.yv = 0
+		Mario.jumptimer = 0
+		Mario.deathtimer = 0
+		Mario.powerup = 0
+		Mario.iframes = 0
+		Mario.dead = false
+		if (keyboard_onpress.Enter) {
+			gameLayer = "game_test"
+			Mario.iframes = 240
+			loadEnemies();
+		}
+		tileanim_timer += 0.035
+		if (mouseButtons[0]) {
+			level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)] = tileBrush
+		}
+		if (mouseButtons[2]) {
+			delete(level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)])
+		}
+	}
+	edit_draw() {
+		
+		canvas.fillStyle = 'rgb(92, 148, 252)';
+		canvas.fillRect(0, 0, 256, 240);
+		
+		//grid
+		
+		canvas.drawImage(img_grid, mod(-Math.round(camera_x), 16)-16, mod(-Math.round(camera_y), 16)-16);
+		
+		drawTileSet();
+		
+		canvas.globalAlpha = 0.5
+		//enemies
+		if (!level.enemies.length == 0) for (let i = 0; i < level.enemies.length; i++) {
+			//drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)
+			if (!(typeof(enemy_defs[level.enemies[i][0]]) == 'undefined')) {
+				if (!(typeof(enemy_defs[level.enemies[i][0]].animation) == 'undefined')) {
+					canvas.drawImage(img_sprites, enemy_defs[level.enemies[i][0]].animation[0].frameX, enemy_defs[level.enemies[i][0]].animation[0].frameY, 16, 16, level.enemies[i][1]-8-camera_x, level.enemies[i][2]-15-camera_y, 16, 16)
+				} else {
+					canvas.drawImage(img_sprites, enemy_defs["inherit"].animation[0].frameX, enemy_defs["inherit"].animation[0].frameY, 16, 16, level.enemies[i][1]-8-camera_x, level.enemies[i][2]-15-camera_y, 16, 16)
+				}
+			} else {
+				canvas.drawImage(img_error, level.enemies[i][1]-8-camera_x, level.enemies[i][2]-15-camera_y, 16, 16)
+			}
+		}
+		canvas.globalAlpha = 1
+		//mario
+		
+		Mario.draw();
+		
+		//text
+		
+		drawTextShadow(0, 224, "X:"+Math.round(Mario.entity.x)+" Y:"+Math.round(Mario.entity.y))
+		drawTextShadow(0, 232, "X:"+Math.trunc((mouse[0]+camera_x)/16)+" Y:"+Math.trunc((mouse[1]+camera_y)/16))
+	}
+	game_test() {
+		gameLayer = "game_test"
+		startGame()
+	}
+	game_test_update() {
+		g_layer.game_update()
+		if (keyboard_onpress.Enter || Mario.deathtimer > 240) {
+			gameLayer = "edit"
+		}
+	}
+	game_test_draw() {
+		g_layer.game_draw()
+		canvas.globalAlpha = 0.5
+		drawText(8, 2, "TEST MODE: PRESS ENTER TO EDIT")
+		canvas.globalAlpha = 1
+	}
+	global_update() {
+		keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+	}
 	global_draw() {}
 }
 
 function startGame() {
-	camera_x = 0;
-	camera_y = 0;
+	tileBrush = 0;
 	title_yv = 2;
 	title_y = 0;
-	tileanim_timer = 0;
-	Mario = undefined
-	delete(Mario)
 	Mario = new Mario_Class(level.marioX,level.marioY)
-	enemies = []
-	if (!level.enemies.length == 0) for (let i = 0; i < level.enemies.length; i++) {
-		if (typeof(enemy_defs[level.enemies[i][0]]) == 'undefined') {
-			console.warn("Invalid enemy id \""+level.enemies[i][0]+"\" ignored at ("+level.enemies[i][1]+", "+level.enemies[i][2]+").")
-			console.warn("You may be loading this level in an older version of the game, or it may be corrupt.")
-		} else {
-			enemies.push(new Baddie_Class(level.enemies[i][1], level.enemies[i][2], level.enemies[i][0]))
-		}
-	}
+	loadEnemies()
+	camera_x = 0;
+	camera_y = 0;
+	tileanim_timer = 0;
+	keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false} 
 	if (!loopStarted) {
 		g_layer = new GameLayer_Class
 		gameLayer = "menu" //g_layer.menu();
@@ -137,6 +229,17 @@ function startGame() {
 	}
 	console.log("\""+gameLayer+"\" Layer Starting")
 	loopStarted = true
+}
+
+function loadEnemies() {
+	enemies = []
+	if (!level.enemies.length == 0) for (let i = 0; i < level.enemies.length; i++) {
+		if (typeof(enemy_defs[level.enemies[i][0]]) == 'undefined') {
+			console.warn("This level may be corrupt, or it is being loaded in the wrong version of the game.")
+		} else {
+			enemies.push(new Baddie_Class(level.enemies[i][1], level.enemies[i][2], level.enemies[i][0]))
+		}
+	}
 }
 
 function gameloop() {

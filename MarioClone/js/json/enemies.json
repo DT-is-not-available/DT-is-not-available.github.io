@@ -20,7 +20,8 @@
 			"frameX": 32,
 			"frameY": 0
 		},
-		"tilecollision": true
+		"tilecollision": true,
+		"enemycollision": true
 	},
 	"goomba": {
 	},
@@ -34,6 +35,7 @@
 				"frameY": 0
 			}
 		],
-		"tilecollision": false
+		"tilecollision": false,
+		"enemycollision": false
 	}
 }

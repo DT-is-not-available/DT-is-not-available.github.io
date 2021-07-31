@@ -6,6 +6,7 @@ class Mario_Class {
 		//default properties
 		this.mirror = false
 		this.dead = false
+		this.freezeWorld = false
 		this.powerup = 0
 		this.frame = 4
 		this.jumptimer = 0
@@ -13,12 +14,15 @@ class Mario_Class {
 		this.walkanim = 0
 		this.entity.up_gravity = 0.25
 		this.deathtimer = 0
+		this.iframes = 0
+		this.entity.tilecollisiontype = "mario_small"
 		
 		//image hitbox for onscreen check
 		this.img_hitbox = {X_neg: 16, X_pos: 16, Y_neg: 32, Y_pos: 0}
 	}
 	game() {
-		if (!this.dead) {
+		if (!this.dead && !this.freezeWorld) {
+			if (this.powerup == 0) {this.entity.tilecollisiontype = "mario_small"} else {this.entity.tilecollisiontype = "mario_big"}
 			this.entity.game()
 			if (this.entity.onfloor && !Math.round(this.entity.xv) == 0) {
 				this.walkanim = mod(this.walkanim+(this.entity.xv/150), 3)
@@ -74,8 +78,8 @@ class Mario_Class {
 				this.frame = 0
 			}
 			if (this.entity.onfloor && !keyboard.Space) {
-				this.jumptimer = 79 + Math.abs(this.entity.xv)/2.5
-				if (keyboard.Shift) this.jumptimer = 79 + Math.abs(this.entity.xv)/2
+				this.jumptimer = 76 + Math.abs(this.entity.xv)/2.5
+				if (keyboard.Shift) this.jumptimer = 76 + Math.abs(this.entity.xv)/2
 			}
 			if (this.entity.onfloor && keyboard.D && !keyboard.A) {
 				this.mirror = false
@@ -90,8 +94,10 @@ class Mario_Class {
 				this.entity.x = Math.round(camera_x)+250
 				this.entity.xv = 0
 			}
-		} else {
+		} else if (this.dead) {
+			this.freezeWorld = true
 			this.frame = 1
+			this.powerup = 0
 			this.deathtimer += 1
 			if (this.deathtimer > 960) startGame()
 			if (this.deathtimer > 120) {
@@ -103,9 +109,21 @@ class Mario_Class {
 			}
 		}
 		if (this.entity.y > camera_y+272) this.dead = true
+		if (this.iframes > 0) this.iframes -= 1
+		if (this.damageframes > 0) this.damageframes -= 1
+		if (this.damageframes <= 0) this.freezeWorld = false
+		if (this.damageframes < 144 && !(this.damageframes === 0)) {
+			if (Math.trunc(this.damageframes/24) === Math.round(this.damageframes/24)) {
+				this.powerup = 0
+			} else {
+				this.powerup = 1
+			}
+		} else if (this.damageframes >= 144) {
+			this.powerup = 1
+		}
 	}
 	draw() {
-		if (onscreen(this.img_hitbox, this.entity.rx, this.entity.ry)) {
+		if ((Math.trunc(this.iframes/8) === Math.round(this.iframes/8) || this.iframes === 0) && onscreen(this.img_hitbox, this.entity.rx, this.entity.ry)) {
 			if (this.mirror) {
 				canvas.scale(-1, 1);
 				canvas.drawImage(img_mario, 32+this.frame*32, this.powerup*32, 32, 32, Math.round(camera_x)-this.entity.rx-16, -Math.round(camera_y)+this.entity.ry-31, 32, 32);
@@ -113,6 +131,18 @@ class Mario_Class {
 			}else{
 				canvas.drawImage(img_mario, 32+this.frame*32, this.powerup*32, 32, 32, -Math.round(camera_x)+this.entity.rx-16, -Math.round(camera_y)+this.entity.ry-31, 32, 32);
 			}
+		}
+	}
+	damage() {
+		if (this.iframes > 0) return
+		if (this.powerup > 0) {
+			this.iframes = 960
+			this.damageframes = 200
+			this.freezeWorld = true
+			this.powerup = 0
+			this.frame = 6
+		} else {
+			this.dead = true
 		}
 	}
 }

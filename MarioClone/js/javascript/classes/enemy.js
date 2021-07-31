@@ -56,6 +56,17 @@ class Baddie_Class {
 				this.mirror = true
 			}
 		}
+		for (let i = 0; i < enemies.length; i++) {
+			if (!(enemies[i] == this) && !enemies[i].dead && enemies[i].enemycollision && this.enemycollision && overlap(enemies[i].entity.hitbox, enemies[i].entity.x, enemies[i].entity.y, this.entity.hitbox, this.entity.x, this.entity.y)) {
+				if (this.entity.x > enemies[i].entity.x) {
+					this.direction = 1
+					enemies[i].direction = -1
+				} else {
+					this.direction = -1
+					enemies[i].direction = 1
+				}
+			}
+		}
 	}
 	draw() {
 		//drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)

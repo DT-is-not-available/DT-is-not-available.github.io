@@ -1,9 +1,10 @@
 const canvas = document.getElementById('canvas').getContext('2d');
 const debug = document.getElementsByClassName('debug');
-
 var fps = 60
 var timemod = 1;
 keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+mouseButtons = [false, false, false]
+mouse = [0, 0]
 loopStarted = false
 
 setScaleAuto();
@@ -11,7 +12,7 @@ setScaleAuto();
 window.addEventListener('resize', setScaleAuto) 
 
 var filesLoaded = 0;
-var filesNeeded = 10;
+var filesNeeded = 15;
 
 var xhttp = new XMLHttpRequest();
 // new file
@@ -87,10 +88,50 @@ img_tileset.onload = function() {
 	}
 };
 
+const img_error = new Image();
+// new file
+img_error.src = 'images/error.png';
+img_error.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_flagpole = new Image();
+// new file
+img_flagpole.src = 'images/flag.png';
+img_flagpole.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_markers = new Image();
+// new file
+img_markers.src = 'images/markerui.png';
+img_markers.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
 const img_mario = new Image();
 // new file
 img_mario.src = 'images/mario.png';
 img_mario.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_grid = new Image();
+// new file
+img_grid.src = 'images/grid.png';
+img_grid.onload = function() {
     filesLoaded += 1
 	if (filesLoaded >= filesNeeded) {
 		startGame();
@@ -131,6 +172,16 @@ const img_text = new Image();
 // new file
 img_text.src = 'images/text.png';
 img_text.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_text_shadow = new Image();
+// new file
+img_text_shadow.src = 'images/text2.png';
+img_text_shadow.onload = function() {
     filesLoaded += 1
 	if (filesLoaded >= filesNeeded) {
 		startGame();

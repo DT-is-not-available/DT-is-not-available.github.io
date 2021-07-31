@@ -33,6 +33,7 @@ function setScale(amount) {
 	canvas.webkitImageSmoothingEnabled = false;
 	canvas.msImageSmoothingEnabled = false;
 	canvas.imageSmoothingEnabled = false;
+	window.canvas_scale = amount
 }
 
 function setScaleAuto() {
@@ -51,33 +52,63 @@ function setScaleFit() {
 	setScale((window.innerHeight)/256);
 }
 
+function getOffset( el ) {
+    var _x = 0;
+    var _y = 0;
+    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+        _x += el.offsetLeft - el.scrollLeft;
+        _y += el.offsetTop - el.scrollTop;
+        el = el.offsetParent;
+    }
+    return { top: _y, left: _x };
+}
+
+function readJSON(file) {
+  const reader = new FileReader();
+  reader.addEventListener('load', (event) => {
+    level = JSON.parse(event.target.result);
+  });
+  reader.readAsText(file);
+}
+
+//input
+
+//keyboard
+
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 87) {
         //console.log('W was pressed');
+		if (!keyboard.W) keyboard_onpress.W = true
 		keyboard.W = true
     }
     else if(event.keyCode == 83) {
         //console.log('S was pressed');
+		if (!keyboard.S) keyboard_onpress.S = true
 		keyboard.S = true
     }
     else if(event.keyCode == 65) {
         //console.log('A was pressed');
+		if (!keyboard.A) keyboard_onpress.A = true
 		keyboard.A = true
     }
     else if(event.keyCode == 68) {
         //console.log('D was pressed');
+		if (!keyboard.D) keyboard_onpress.D = true
 		keyboard.D = true
     }
     else if(event.keyCode == 16) {
         //console.log('Shift was pressed');
+		if (!keyboard.Shift) keyboard_onpress.Shift = true
 		keyboard.Shift = true
     }
     else if(event.keyCode == 32) {
         //console.log('Space was pressed');
+		if (!keyboard.Space) keyboard_onpress.Space = true
 		keyboard.Space = true
     }
     else if(event.keyCode == 13) {
         //console.log('Enter was pressed');
+		if (!keyboard.Enter) keyboard_onpress.Enter = true
 		keyboard.Enter = true
     }
 });
@@ -86,29 +117,56 @@ document.addEventListener('keyup', function(event) {
     if(event.keyCode == 87) {
         //console.log('W was released');
 		keyboard.W = false
+		keyboard_onpress.W = false
     }
     else if(event.keyCode == 83) {
         //console.log('S was released');
 		keyboard.S = false
+		keyboard_onpress.S = false
     }
     else if(event.keyCode == 65) {
         //console.log('A was released');
 		keyboard.A = false
+		keyboard_onpress.A = false
     }
     else if(event.keyCode == 68) {
         //console.log('D was released');
 		keyboard.D = false
+		keyboard_onpress.D = false
     }
     else if(event.keyCode == 16) {
         //console.log('Shift was released');
 		keyboard.Shift = false
+		keyboard_onpress.Shift = false
     }
     else if(event.keyCode == 32) {
         //console.log('Space was released');
 		keyboard.Space = false
+		keyboard_onpress.Space = false
     }
     else if(event.keyCode == 13) {
         //console.log('Enter was released');
 		keyboard.Enter = false
+		keyboard_onpress.Enter = false
     }
 });
+
+//mouse coordinates
+
+canvas.addEventListener('mousemove', function(event) {
+    window.mouseX = event.x
+	window.mouseY = event.y
+	mouse = [Math.round((window.mouseX-getOffset( document.getElementById('canvas') ).left)/window.canvas_scale), Math.round((window.mouseY-getOffset( document.getElementById('canvas') ).top)/window.canvas_scale)]
+});
+
+//mouse input
+
+canvas.addEventListener('mousedown', function(event) {
+	mouseButtons[event.button] = true
+});
+
+canvas.addEventListener('mouseup', function(event) {
+	mouseButtons[event.button] = false
+});
+
+canvas.addEventListener('contextmenu', event => event.preventDefault());
