@@ -1,0 +1,25 @@
+{
+	"main_menu": {
+		"type": "floating",
+		"width": 256,
+		"height": 240,
+		"text": [
+			["1 PLAYER GAME", 80, 136, 1],
+			["LEVEL EDITOR", 80, 152, 1],
+			["SETTINGS", 80, 168, 0.5]
+		],
+		"text_shadowed": [
+			["DISCORD", 80, 184]
+		],
+		"options": [
+			[64, 136, "layer", "game"],
+			[64, 152, "layer", "edit"],
+			[64, 184, "url", "https://discord.gg/m5YuTSrWWP"]
+		]
+	},
+	"pause": {
+		"type": "overlay",
+		"width": 96,
+		"height": 96
+	}
+}

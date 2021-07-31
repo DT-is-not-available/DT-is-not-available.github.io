@@ -28,3 +28,28 @@ function drawTextShadow(xpos, ypos, p_text, world=false) {
 		if (world) canvas.drawImage(img_text, font_defs[p_text.charAt(i)][0]*8, font_defs[p_text.charAt(i)][1]*8, 8, 8, -Math.round(camera_x)+xpos+i*8, -Math.round(camera_y)+ypos, 8, 8)
 	}
 }
+
+function drawMenu(xpos, ypos, id, cursor=false) {
+	for (let i = 0; i < menu_defs[id].text.length; i++) {
+		canvas.globalAlpha = xpos+menu_defs[id].text[i][3]
+		drawText(xpos+menu_defs[id].text[i][1], ypos+menu_defs[id].text[i][2], menu_defs[id].text[i][0])
+		canvas.globalAlpha = 1
+	}
+	for (let i = 0; i < menu_defs[id].text_shadowed.length; i++) {
+		drawTextShadow(xpos+menu_defs[id].text_shadowed[i][1], ypos+menu_defs[id].text_shadowed[i][2], menu_defs[id].text_shadowed[i][0])
+	}
+	if (cursor) canvas.drawImage(img_text, 120, 8, 8, 8, menu_defs[id].options[menuOption][0], menu_defs[id].options[menuOption][1], 8, 8)
+}
+
+function handleMenu(id) {
+	if (keyboard.S || keyboard.D) menuOption += 1
+	if (keyboard.W || keyboard.A) menuOption -= 1
+	if (keyboard.Space || keyboard.Enter) {
+		if (menu_defs[id].options[menuOption][2] == "layer") g_layer[menu_defs[id].options[menuOption][3]]()
+		if (menu_defs[id].options[menuOption][2] == "url") window.open(menu_defs[id].options[menuOption][3]);
+	}
+	if (menuOption > menu_defs[id].options.length-1) menuOption = menu_defs[id].options.length-1
+	if (menuOption < 0) menuOption = 0
+	keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+	keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+}

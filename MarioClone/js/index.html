@@ -67,6 +67,7 @@ fpsslider.oninput = function() {
 	  <p class="debug">NULL</p>
 	  <p class="debug">NULL</p>
 	  <p class="debug">NULL</p>
+	  <p class="debug">NULL</p>
 	  <p class="debug">NULL</p><br>
 	  <p id="dispspeed">SPEED: </p>
 	  <div class="rangeslider">
@@ -95,7 +96,7 @@ speedslider.oninput = function() {
 	  <button onclick="g_layer.edit(); this.blur();">g_layer.edit</button><br>
 	  <button onclick="g_layer.game_test(); this.blur();">g_layer.game_test</button>
 	</div><br><p>
-	<input type="file" id="level_upload" accept=".json"></input>
+	<input type="file" id="level_upload" onclick="this.blur();" accept=".json"></input>
 	<script>
 const levelUpload = document.getElementById('level_upload');
 levelUpload.addEventListener('change', (event) => {

@@ -39,6 +39,25 @@ button:hover {
   background: #444444 !important;
   background: solid;
 }
+input[type=file]::before {
+  display: inline-block;
+  content: 'LOAD LEVEL';
+  font-family: 'Press Start 2P';font-size: 16px;
+  color: #FFFFFF !important;
+  font-size: 16px;
+  padding: 2px 2px;
+  border: 2px solid #ffffff;
+  background: #000000;
+  outline: none;
+  white-space: nowrap;
+}
+input[type=file]:hover::before {
+  background: #444444 !important;
+  background: solid;
+}
+input[type=file]::-webkit-file-upload-button {
+  visibility: hidden;
+}
 .settings {
   display: none;
   overflow: hidden;

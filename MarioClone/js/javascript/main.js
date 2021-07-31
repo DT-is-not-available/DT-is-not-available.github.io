@@ -52,22 +52,14 @@ class GameLayer_Class {
 			if (camera_x > level.settings.width*16)
 				camera_x = level.settings.width*16
 			
-		}
-		
-		debug[0].innerHTML = "X: "+Math.round(Mario.entity.x*100)/100
-		debug[1].innerHTML = "Y: "+Math.round(Mario.entity.y*100)/100
-		debug[2].innerHTML = "XV: "+Math.round(Mario.entity.xv*100)/100
-		debug[3].innerHTML = "YV: "+Math.round(Mario.entity.yv*100)/100
-		debug[4].innerHTML = "JT: "+Math.round(Mario.jumptimer)
-		debug[5].innerHTML = "F: "+Mario.entity.onfloor
-		
+		}		
 	}
 	game_draw() {
 		
 		canvas.fillStyle = 'rgb(92, 148, 252)';
 		canvas.fillRect(0, 0, 256, 240);
 		
-		drawTileSet();
+		drawTileSet(level.temptiles);
 		
 		//enemies
 		if (!enemies.length == 0) for (let i = 0; i < enemies.length; i++) {
@@ -78,13 +70,21 @@ class GameLayer_Class {
 		
 		Mario.draw();
 		
+		//HUD
+		
+		drawText(0, 8, "   MARIO          WORLD  TIME")
+		drawText(0, 16, "   000000   x00    1-1    400")
+		canvas.drawImage(img_text, [136, 136, 136, 136+8, 136+16, 136+8][mod(Math.round(tileanim_timer), 6)], 8, 8, 8, 88, 16, 8, 8)
+		
 	}
 	menu() {
 		gameLayer = "menu"
 		startGame()
 	}
 	menu_update() {
-		camera_x = 0
+		handleMenu("main_menu")
+		camera_x += 0.1
+		if (camera_x > level.settings.width*16+256) camera_x = -256
 		camera_y = 0
 		if (keyboard_onpress.Space) gameLayer = "game"
 		if (keyboard_onpress.Enter) gameLayer = "edit"
@@ -95,11 +95,11 @@ class GameLayer_Class {
 		
 		canvas.fillStyle = 'rgb(92, 148, 252)';
 		canvas.fillRect(0, 0, 256, 240);
+		drawTileSet(level.tiles);
 		//canvas.drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)
 		canvas.drawImage(img_title, 1, 91, 184, 88, 36, 28+Math.round(window.title_y), 184, 88);
 		drawText(36, 28+89+Math.round(window.title_y), "JAVASCRIPT EDITION");
-		drawText(50, 160, "PRESS SPACE TO PLAY");
-		drawText(50, 176, "PRESS ENTER TO EDIT");
+		drawMenu(0, 0, "main_menu", true)
 		
 	}
 	edit() {
@@ -142,6 +142,7 @@ class GameLayer_Class {
 		Mario.dead = false
 		if (keyboard_onpress.Enter) {
 			gameLayer = "game_test"
+			level.temptiles = JSON.parse(JSON.stringify(level.tiles))
 			Mario.iframes = 240
 			loadEnemies();
 		}
@@ -159,12 +160,19 @@ class GameLayer_Class {
 		canvas.fillRect(0, 0, 256, 240);
 		
 		//grid
-		
 		canvas.drawImage(img_grid, mod(-Math.round(camera_x), 16)-16, mod(-Math.round(camera_y), 16)-16);
 		
-		drawTileSet();
-		
+		//tilepreview
 		canvas.globalAlpha = 0.5
+		canvas.drawImage(img_tileset, tile_defs[tileBrush].tileX*16, tile_defs[tileBrush].tileY*16, 16, 16, Math.trunc((mouse[0]+camera_x)/16)*16-camera_x, Math.trunc((mouse[1]+camera_y)/16)*16-camera_y, 16, 16);
+		canvas.globalAlpha = 1
+		
+		//tiles		
+		drawTileSet(level.tiles);
+		
+		//marioStart
+		canvas.drawImage(img_markers, 0, 0, 16, 16, level.marioX-8-camera_x, level.marioY-15-camera_y, 16, 16)
+		
 		//enemies
 		if (!level.enemies.length == 0) for (let i = 0; i < level.enemies.length; i++) {
 			//drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)
@@ -178,7 +186,7 @@ class GameLayer_Class {
 				canvas.drawImage(img_error, level.enemies[i][1]-8-camera_x, level.enemies[i][2]-15-camera_y, 16, 16)
 			}
 		}
-		canvas.globalAlpha = 1
+		
 		//mario
 		
 		Mario.draw();
@@ -201,19 +209,33 @@ class GameLayer_Class {
 	game_test_draw() {
 		g_layer.game_draw()
 		canvas.globalAlpha = 0.5
-		drawText(8, 2, "TEST MODE: PRESS ENTER TO EDIT")
+		drawText(8, 26, "TEST MODE: PRESS ENTER TO EDIT")
 		canvas.globalAlpha = 1
 	}
 	global_update() {
 		keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+		debug[0].innerHTML = "X: "+Math.round(Mario.entity.x*100)/100
+		debug[1].innerHTML = "Y: "+Math.round(Mario.entity.y*100)/100
+		debug[2].innerHTML = "XV: "+Math.round(Mario.entity.xv*100)/100
+		debug[3].innerHTML = "YV: "+Math.round(Mario.entity.yv*100)/100
+		debug[4].innerHTML = "JT: "+Math.round(Mario.jumptimer)
+		debug[5].innerHTML = "F: "+Mario.entity.onfloor
+		debug[6].innerHTML = "M: "+mouse
 	}
-	global_draw() {}
+	global_draw() {
+		canvas.globalAlpha = 0.5
+		drawText(0, 0, currentfps.toString())
+		fpstick += 1
+		canvas.globalAlpha = 1
+	}
 }
 
 function startGame() {
 	tileBrush = 0;
+	menuOption = 0;
 	title_yv = 2;
 	title_y = 0;
+	level.temptiles = JSON.parse(JSON.stringify(level.tiles))
 	Mario = new Mario_Class(level.marioX,level.marioY)
 	loadEnemies()
 	camera_x = 0;
@@ -223,8 +245,11 @@ function startGame() {
 	if (!loopStarted) {
 		g_layer = new GameLayer_Class
 		gameLayer = "menu" //g_layer.menu();
+		fpstick = 59
+		currentfps = 60
 		gameloop();
 		renderloop();
+		fpsloop();
 		console.log("Game Starting")
 	}
 	console.log("\""+gameLayer+"\" Layer Starting")
@@ -248,8 +273,19 @@ function gameloop() {
 	g_layer.global_update();
 }
 
+function fpsloop() {
+	window.setTimeout(fpsloop, 1000);
+	currentfps = fpstick
+	fpstick = 0
+}
+
+
 function renderloop() {
 	window.setTimeout(renderloop, 1000/fps);
 	g_layer[gameLayer+"_draw"]();
 	g_layer.global_draw();
+}
+
+function activateTile(x, y) {
+	level.temptiles[x+","+y] = tile_defs[level.temptiles[x+","+y]].interaction.hitTile
 }

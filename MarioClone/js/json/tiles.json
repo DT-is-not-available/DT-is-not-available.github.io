@@ -19,7 +19,7 @@
 			"right": true
 		},
 		"interaction": {
-			"floor": true,
+			"floor": false,
 			"ceiling": true,
 			"hasCoin": true,
 			"hitTile": 2,
@@ -75,6 +75,8 @@
 			"right": true
 		},
 		"interaction": {
+			"ceiling": true,
+			"floor": false,
 			"hasCoin": false,
 			"hitTile": 2,
 			"breakable": true,
