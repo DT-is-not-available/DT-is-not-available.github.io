@@ -1,6 +1,7 @@
 const canvas = document.getElementById('canvas').getContext('2d');
 const debug = document.getElementsByClassName('debug');
 var fps = 60
+var debug_mode = false
 var timemod = 1;
 keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
 mouseButtons = [false, false, false]
@@ -12,7 +13,7 @@ setScaleAuto();
 window.addEventListener('resize', setScaleAuto) 
 
 var filesLoaded = 0;
-var filesNeeded = 16;
+var filesNeeded = 17;
 
 var xhttp = new XMLHttpRequest();
 // new file
@@ -98,6 +99,16 @@ const img_tileset = new Image();
 // new file
 img_tileset.src = 'images/tileset.png';
 img_tileset.onload = function() {
+    filesLoaded += 1
+	if (filesLoaded >= filesNeeded) {
+		startGame();
+	}
+};
+
+const img_particles = new Image();
+// new file
+img_particles.src = 'images/particles.png';
+img_particles.onload = function() {
     filesLoaded += 1
 	if (filesLoaded >= filesNeeded) {
 		startGame();

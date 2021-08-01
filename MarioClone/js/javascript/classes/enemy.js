@@ -26,12 +26,12 @@ class Baddie_Class {
 		this.dead = false
 		
 		//create the entity
-		this.entity = new Generic_entity_class(xpos, ypos, {X_neg: 4, X_pos: 4, Y_neg: 12, Y_pos: -4})
+		this.entity = new Generic_entity_class(xpos, ypos, this.hitbox)
 		this.entity.gravity = this.gravity
 		this.entity.tilecollision = this.tilecollision
 	
 		//image hitbox for onscreen check
-		this.img_hitbox = {X_neg: 8, X_pos: 8, Y_neg: 16, Y_pos: 0}
+		this.img_hitbox = {X_neg: this.animationWidth/2, X_pos: this.animationWidth/2, Y_neg: this.animationHeight, Y_pos: 0}
 		
 	}
 	game() {
@@ -43,6 +43,7 @@ class Baddie_Class {
 				this.entity.game()
 			}
 			if (this.deathtimer >= 120) this.delete = true
+			this.entity.hitbox = false
 		} else {
 			this.entity.game()
 			this.animationTimer += (1/240)*this.animationFPS

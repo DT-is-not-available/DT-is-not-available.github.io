@@ -119,4 +119,8 @@ class Generic_entity_class {
 		this.rx = Math.round(this.x)
 		this.ry = Math.round(this.y)
 	}
+	draw() {
+		canvas.fillStyle = 'rgba(0, 255, 0, 127)';
+		canvas.fillRect(Math.round(this.rx-camera_x-this.hitbox.X_neg), Math.round(this.ry-camera_y-this.hitbox.Y_neg), this.hitbox.X_neg+this.hitbox.X_pos, this.hitbox.Y_neg+this.hitbox.Y_pos)
+	}
 }

@@ -5,10 +5,31 @@ class GameLayer_Class {
 	}
 	game_update() {
 		
+		//pause menu
+		if (keyboard_onpress.Escape) addMenu(64, 92, "pause")
+		
 		//mario
 		Mario.game();
 		
+		//hit block
+		hit_block.game();
+		
 		if (!Mario.freezeWorld){
+			
+			//level timer
+			
+			world_timer -= 1/200
+			if (world_timer < 0) {
+				world_timer = 0
+				Mario.dead = true
+			}
+			
+			//particles
+			
+			for (let i = 0; i < particles.length; i++) {
+				particles[i].game()
+				if ((Math.round(particles[i].life) == 0) || (false)) particles.splice(i, 1)
+			}
 			
 			//enemies
 			
@@ -17,6 +38,14 @@ class GameLayer_Class {
 				if (!enemies[i].dead && overlap(Mario.entity.hitbox, Mario.entity.x, Mario.entity.y, enemies[i].entity.hitbox, enemies[i].entity.x, enemies[i].entity.y)) {
 					if ((Mario.entity.y < enemies[i].entity.y || Mario.entity.yv > Mario.entity.gravity)&& enemies[i].canStomp) {
 						Mario.entity.yv = -20
+						Mario.enemy_combo += 1
+						if (Mario.enemy_combo < 8) {
+							Mario.score += [100, 200, 400, 800, 1000, 2000, 4000, 8000][Mario.enemy_combo]
+//Particle_class(xpos, ypos, xv, yv, imgX, imgY, imgW, imgH, gravity, lifetime, frames, speed)
+							particles.push(new Particle_class(enemies[i].entity.x, enemies[i].entity.y-8, 0, -1, 0, [0, 8, 16, 24, 0, 8, 16, 24][Mario.enemy_combo], [11, 12, 12, 12, 15, 16, 16, 16][Mario.enemy_combo], 8, 0, 45))
+						} else {
+							particles.push(new Particle_class(enemies[i].entity.x, enemies[i].entity.y-8, 0, -1, 0, 32, 16, 7, 0, 45))
+						}
 						if (level.settings.enemy_high_jump) Mario.jumptimer = 90
 						enemies[i].dead = true
 						if (!enemies[i].deathAnimation) {
@@ -35,14 +64,37 @@ class GameLayer_Class {
 		
 			tileanim_timer += 0.035
 			
-			if (Mario.entity.xv > 0 && (Mario.entity.x-64) > camera_x)
-				camera_x += Mario.entity.xv/32
-			if ((Mario.entity.x-128) > camera_x)
-				camera_x = Mario.entity.x-128
-			if ((Mario.entity.y-128-48) > camera_y)
-				camera_y = Mario.entity.y-128-48
-			if ((Mario.entity.y-128+48) < camera_y)
-				camera_y = Mario.entity.y-128+48
+			//camera
+			if (level.settings.camera == 0) {
+				if (Mario.entity.xv > 0 && (Mario.entity.x-64) > camera_x)
+					camera_x += Mario.entity.xv/32
+				if ((Mario.entity.x-128) > camera_x)
+					camera_x = Mario.entity.x-128
+				if ((Mario.entity.y-128-48) > camera_y)
+					camera_y = Mario.entity.y-128-48
+				if ((Mario.entity.y-128+48) < camera_y)
+					camera_y = Mario.entity.y-128+48
+			} else if (level.settings.camera == 1) {
+				if (Mario.entity.xv > 0 && (Mario.entity.x-64) > camera_x)
+					camera_x += Mario.entity.xv/32
+				if ((Mario.entity.x-128) > camera_x)
+					camera_x = Mario.entity.x-128
+				if ((Mario.entity.x-64) < camera_x)
+					camera_x = Mario.entity.x-64
+				if ((Mario.entity.y-128-48) > camera_y)
+					camera_y = Mario.entity.y-128-48
+				if ((Mario.entity.y-128+48) < camera_y)
+					camera_y = Mario.entity.y-128+48
+			} else if (level.settings.camera == 2) {
+				if ((Mario.entity.x-136) > camera_x)
+					camera_x = Mario.entity.x-136
+				if ((Mario.entity.x-120) < camera_x)
+					camera_x = Mario.entity.x-120
+				if ((Mario.entity.y-128-8) > camera_y)
+					camera_y = Mario.entity.y-128-8
+				if ((Mario.entity.y-128+8) < camera_y)
+					camera_y = Mario.entity.y-128+8
+			}
 			if (camera_y < 0)
 				camera_y = 0
 			if (camera_y > level.settings.height*16)
@@ -51,7 +103,6 @@ class GameLayer_Class {
 				camera_x = 0
 			if (camera_x > level.settings.width*16)
 				camera_x = level.settings.width*16
-			
 		}		
 	}
 	game_draw() {
@@ -64,17 +115,34 @@ class GameLayer_Class {
 		//enemies
 		if (!enemies.length == 0) for (let i = 0; i < enemies.length; i++) {
 			enemies[i].draw();
+			if (debug_mode) canvas.globalAlpha = 0.5
+			if (debug_mode) enemies[i].entity.draw();
+			if (debug_mode) canvas.globalAlpha = 1
 		}
+		
+		//hit block
+		
+		hit_block.draw();
 		
 		//mario
 		
 		Mario.draw();
+		if (debug_mode) canvas.globalAlpha = 0.5
+		if (debug_mode) Mario.entity.draw();
+		if (debug_mode) canvas.globalAlpha = 1
+		
+		//particles
+		for (let i = 0; i < particles.length; i++) {
+			particles[i].draw()
+		}
 		
 		//HUD
 		
-		drawText(0, 8, "   MARIO          WORLD  TIME")
-		drawText(0, 16, "   000000   x00    1-1    400")
-		canvas.drawImage(img_text, [136, 136, 136, 136+8, 136+16, 136+8][mod(Math.round(tileanim_timer), 6)], 8, 8, 8, 88, 16, 8, 8)
+		if (!debug_mode) {
+			drawText(0, 8, "   MARIO          WORLD  TIME")
+			drawText(0, 16, "   "+Mario.score.toString().padStart(6,'0').padEnd(8,' ')+" x"+mod(Mario.coins,100).toString().padStart(2,'0')+"    1-1  "+Math.trunc(world_timer).toString().padStart(3,'0').padStart(5,' '))
+			canvas.drawImage(img_text, [136, 136, 136, 136+8, 136+16, 136+8][mod(Math.round(tileanim_timer), 6)], 8, 8, 8, 88, 16, 8, 8)
+		}
 		
 	}
 	menu() {
@@ -82,12 +150,10 @@ class GameLayer_Class {
 		startGame()
 	}
 	menu_update() {
-		handleMenu("main_menu")
+		if (menus.length == 0) menus = [[64, 136, "main_menu"]]
 		camera_x += 0.1
 		if (camera_x > level.settings.width*16+256) camera_x = -256
 		camera_y = 0
-		if (keyboard_onpress.Space) gameLayer = "game"
-		if (keyboard_onpress.Enter) gameLayer = "edit"
 		window.title_y += window.title_yv/50
 		window.title_yv += -(Math.abs(window.title_y)/window.title_y)*0.01
 	}
@@ -99,7 +165,6 @@ class GameLayer_Class {
 		//canvas.drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)
 		canvas.drawImage(img_title, 1, 91, 184, 88, 36, 28+Math.round(window.title_y), 184, 88);
 		drawText(36, 28+89+Math.round(window.title_y), "JAVASCRIPT EDITION");
-		drawMenu(0, 0, "main_menu", true)
 		
 	}
 	edit() {
@@ -213,7 +278,10 @@ class GameLayer_Class {
 		canvas.globalAlpha = 1
 	}
 	global_update() {
-		keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+		if (!(menus.length == 0)) {
+			handleMenu(menus[menus.length-1][2])
+		}
+		keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false}
 		debug[0].innerHTML = "X: "+Math.round(Mario.entity.x*100)/100
 		debug[1].innerHTML = "Y: "+Math.round(Mario.entity.y*100)/100
 		debug[2].innerHTML = "XV: "+Math.round(Mario.entity.xv*100)/100
@@ -221,32 +289,56 @@ class GameLayer_Class {
 		debug[4].innerHTML = "JT: "+Math.round(Mario.jumptimer)
 		debug[5].innerHTML = "F: "+Mario.entity.onfloor
 		debug[6].innerHTML = "M: "+mouse
+		tpstick += 1
 	}
 	global_draw() {
-		canvas.globalAlpha = 0.5
-		drawText(0, 0, currentfps.toString())
+		if (!(menus.length == 0)) {
+			for (let i = 1; i < menus.length; i++) {
+				drawMenu(menus[i-1][0], menus[i-1][1], menus[i-1][2], false)
+			}
+			drawMenu(menus[menus.length-1][0], menus[menus.length-1][1], menus[menus.length-1][2], menus[menus.length-1][3])
+		}
+		if (!debug_mode) {
+			canvas.globalAlpha = 0.5
+			drawText(0, 0, currenttps.toString())
+			drawText(0, 8, currentfps.toString())
+			canvas.globalAlpha = 1
+		} else {
+			drawText(0, 0, ("TPS: "+currenttps.toString()).padEnd(16, ' ')+("FPS: "+currentfps.toString()).padEnd(16, ' '))
+			drawText(0, 8, ("X: "+Math.round(Mario.entity.x*100)/100).padEnd(16, ' ')+("Y: "+Math.round(Mario.entity.y*100)/100).padEnd(16, ' '))
+			drawText(0, 16, ("XV: "+Math.round(Mario.entity.xv*100)/100).padEnd(16, ' ')+("YV: "+Math.round(Mario.entity.yv*100)/100).padEnd(16, ' '))
+			drawText(0, 24, ("EC: "+enemies.length).padEnd(16, ' ')+("PC: "+particles.length).padEnd(16, ' '))
+			drawText(0, 32, ("MX: "+mouse[0]).padEnd(16, ' ')+("MY: "+mouse[1]).padEnd(16, ' '))
+			drawText(0, 40, ("CX: "+Math.round(camera_x)).padEnd(16, ' ')+("CY: "+Math.round(camera_y)).padEnd(16, ' '))
+		}
 		fpstick += 1
-		canvas.globalAlpha = 1
 	}
 }
 
-function startGame() {
+function startGame(menu_stack=[]) {
+	hit_block = new Block_class(0, 0, 0, -999)
+	world_timer = level.settings.timer
 	tileBrush = 0;
 	menuOption = 0;
 	title_yv = 2;
 	title_y = 0;
 	level.temptiles = JSON.parse(JSON.stringify(level.tiles))
 	Mario = new Mario_Class(level.marioX,level.marioY)
+	particles = []
+	menus = menu_stack
 	loadEnemies()
 	camera_x = 0;
 	camera_y = 0;
 	tileanim_timer = 0;
-	keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false} 
+	keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false} 
 	if (!loopStarted) {
 		g_layer = new GameLayer_Class
 		gameLayer = "menu" //g_layer.menu();
+		menus = [[64, 136, "main_menu"]]
 		fpstick = 59
 		currentfps = 60
+		tpstick = 239
+		currenttps = 240
 		gameloop();
 		renderloop();
 		fpsloop();
@@ -254,6 +346,16 @@ function startGame() {
 	}
 	console.log("\""+gameLayer+"\" Layer Starting")
 	loopStarted = true
+}
+
+function addMenu(x, y, id, cursor=true) {
+	menus.push([x, y, id, cursor])
+	menuOption = 0
+}
+
+function quitMenu() {
+	menus.pop()
+	menuOption = 0
 }
 
 function loadEnemies() {
@@ -269,7 +371,9 @@ function loadEnemies() {
 
 function gameloop() {
 	window.setTimeout(gameloop, 1000/(240*timemod));
-	g_layer[gameLayer+"_update"]();
+	if (menus.length == 0 || !menu_defs[menus[menus.length-1][2]].pauses) {
+		g_layer[gameLayer+"_update"]();
+	}
 	g_layer.global_update();
 }
 
@@ -277,6 +381,8 @@ function fpsloop() {
 	window.setTimeout(fpsloop, 1000);
 	currentfps = fpstick
 	fpstick = 0
+	currenttps = tpstick
+	tpstick = 0
 }
 
 
@@ -288,4 +394,7 @@ function renderloop() {
 
 function activateTile(x, y) {
 	level.temptiles[x+","+y] = tile_defs[level.temptiles[x+","+y]].interaction.hitTile
+//Particle_class(xpos, ypos, xv, yv, imgX, imgY, imgW, imgH, gravity, lifetime, frames, speed)
+	particles.push(new Particle_class((x+0.5)*16, y*16, 0, -7, 32, 8, 8, 14, 0.45, 30, 4, 3))
+	hit_block = new Block_class(x, y)
 }

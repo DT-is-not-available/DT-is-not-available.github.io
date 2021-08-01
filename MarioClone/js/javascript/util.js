@@ -1,5 +1,5 @@
 function resetkeys() {
-	keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
+	keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false}
 }
 
 function onscreen(hitbox_1, x_p, y_p) {
@@ -9,6 +9,7 @@ function onscreen(hitbox_1, x_p, y_p) {
 function mod(x, y) {return x - y * Math.floor(x / y)}
 
 function overlap(r1, x1, y1, r2, x2, y2) {
+	if (r1 === false || r2 === false) return false
 	left1 = x1-r1.X_neg
 	right1 = x1+r1.X_pos
 	top1 = y1-r1.Y_neg
@@ -67,6 +68,7 @@ function readJSON(file) {
   const reader = new FileReader();
   reader.addEventListener('load', (event) => {
     level = JSON.parse(event.target.result);
+	g_layer.edit()
   });
   reader.readAsText(file);
 }
@@ -111,6 +113,11 @@ document.addEventListener('keydown', function(event) {
 		if (!keyboard.Enter) keyboard_onpress.Enter = true
 		keyboard.Enter = true
     }
+    else if(event.keyCode == 27) {
+        //console.log('Escape was pressed');
+		if (!keyboard.Escape) keyboard_onpress.Escape = true
+		keyboard.Escape = true
+    }
 });
 
 document.addEventListener('keyup', function(event) {
@@ -148,6 +155,11 @@ document.addEventListener('keyup', function(event) {
         //console.log('Enter was released');
 		keyboard.Enter = false
 		keyboard_onpress.Enter = false
+    }
+    else if(event.keyCode == 27) {
+        //console.log('Escape was released');
+		keyboard.Escape = false
+		keyboard_onpress.Escape = false
     }
 });
 

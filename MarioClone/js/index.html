@@ -28,6 +28,8 @@ window.addEventListener("error",function(err) {
     <script src="javascript/classes/enemy.js"></script>
     <script src="javascript/classes/generic_entity.js"></script>
     <script src="javascript/classes/text.js"></script>
+    <script src="javascript/classes/blockhit.js"></script>
+    <script src="javascript/classes/particle.js"></script>
     <script src="setup.js"></script>
 	<button type="button" class="collapsible" onclick="this.blur();">SETTINGS</button>
 	<div class="settings">
@@ -126,8 +128,10 @@ coll[0].addEventListener("click", function() {
   var content = this.nextElementSibling;
   if (content.style.display === "block") {
     content.style.display = "none";
+	debug_mode = false
   } else {
     content.style.display = "block";
+	debug_mode = true
   }
 });
 	</script>
