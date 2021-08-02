@@ -412,6 +412,29 @@ function quitMenu() {
 	menuOption = 0
 }
 
+function saveLevel(params) {
+	quitMenu()
+	download_file('level.lvl2', btoa(JSON.stringify(level)))
+	addMenu(64, 92, "dialouge_save", false)
+}
+function exportLevel(params) {
+	quitMenu()
+	window.open('https://gdengine.github.io/MarioClone/js/#'+btoa(JSON.stringify(level)))
+	addMenu(64, 92, "dialouge_export", false)
+}
+function newLevel(params) {
+	menus = []
+	level = JSON.parse(atob(
+	"eyJ0eXBlIjoiVjEiLCJtYXJpb1giOjMyLCJtYXJpb1kiOjIwOCwic2V0dGluZ3MiOnsiY2FtZXJhIjowLCJoZWlnaHQiOjAsIndpZHRoIjowLCJlbmVteV9oaWdoX2p1bXAiOmZhbHNlLCJ0aW1lciI6NDAwfSwidGlsZXMiOnsiMCwxMyI6MCwiMSwxMyI6MCwiMiwxMyI6MCwiMywxMyI6MCwiNCwxMyI6MCwiNSwxMyI6MCwiNiwxMyI6MCwiNywxMyI6MCwiOCwxMyI6MCwiOSwxMyI6MCwiMTAsMTMiOjAsIjExLDEzIjowLCIxMiwxMyI6MCwiMTMsMTMiOjAsIjE0LDEzIjowLCIxNSwxMyI6MCwiMCwxNCI6MCwiMSwxNCI6MCwiMiwxNCI6MCwiMywxNCI6MCwiNCwxNCI6MCwiNSwxNCI6MCwiNiwxNCI6MCwiNywxNCI6MCwiOCwxNCI6MCwiOSwxNCI6MCwiMTAsMTQiOjAsIjExLDE0IjowLCIxMiwxNCI6MCwiMTMsMTQiOjAsIjE0LDE0IjowLCIxNSwxNCI6MH0sImVuZW1pZXMiOltdfQ=="
+	
+	))
+	g_layer.edit()
+}
+function openLevel(params) {
+	quitMenu()
+	document.getElementById('level_upload').click()
+}
+
 function selectTile(params) {
 	if (buildMode == 0 && tile_defs[Math.trunc((mouse[0]-8)/16)+Math.trunc((mouse[1]-40)/16)*16]) {
 		tileBrush = Math.trunc((mouse[0]-8)/16)+Math.trunc((mouse[1]-40)/16)*16
@@ -456,9 +479,11 @@ function renderloop() {
 }
 
 function activateTile(x, y) {
-	level.temptiles[x+","+y] = tile_defs[level.temptiles[x+","+y]].interaction.hitTile
 //Particle_class(xpos, ypos, xv, yv, imgX, imgY, imgW, imgH, gravity, lifetime, frames, speed)
-	particles.push(new Particle_class((x+0.5)*16, y*16, 0, -7, 32, 8, 8, 14, 0.45, 30, 4, 3))
-	Mario.coins += 1
+	if (tile_defs[level.temptiles[x+","+y]].interaction.hasCoin) {
+		particles.push(new Particle_class((x+0.5)*16, y*16, 0, -7, 32, 8, 8, 14, 0.45, 30, 4, 3))
+		Mario.coins += 1
+		level.temptiles[x+","+y] = tile_defs[level.temptiles[x+","+y]].interaction.hitTile
+	}
 	hit_block = new Block_class(x, y)
 }
