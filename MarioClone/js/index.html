@@ -102,7 +102,7 @@ speedslider.oninput = function() {
 	</div><br><p><br>
 	<button class="levelButtons" onclick="download_file('level.lvl2', btoa(JSON.stringify(level))); this.blur();">SAVE LEVEL</button><br>
 	<input class="levelButtons" type="file" id="level_upload" onclick="this.blur();" accept=".json"></input><br>
-	<button class="levelButtons" onclick="window.open('localhost:8000#'+btoa(JSON.stringify(level))); this.blur();">EXPORT LEVEL</button>
+	<button class="levelButtons" onclick="window.open('https://gdengine.github.io/MarioClone/js/#'+btoa(JSON.stringify(level))); this.blur();">EXPORT LEVEL</button>
 	<script>
 const levelUpload = document.getElementById('level_upload');
 levelUpload.addEventListener('change', (event) => {
