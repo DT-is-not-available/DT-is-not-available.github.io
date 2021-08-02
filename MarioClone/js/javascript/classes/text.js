@@ -29,26 +29,28 @@ function drawTextShadow(xpos, ypos, p_text, world=false) {
 	}
 }
 
-function drawMenu(xpos, ypos, id, cursor=true, custom_draw=function(){}) {
+function drawMenu(xpos, ypos, id, cursor=true, custom_draw=function(id){}) {
 	if (menu_defs[id].type == "popup") {
 		canvas.globalAlpha = 0.75
 		canvas.fillStyle = 'rgb(0, 0, 0)';
 		canvas.fillRect(xpos-menu_defs[id].padding, ypos-menu_defs[id].padding, menu_defs[id].width+menu_defs[id].padding*2, menu_defs[id].height+menu_defs[id].padding*2)
 		canvas.globalAlpha = 1
 	}
-	if (menu_defs[id].type == "overlay") {
+	if (menu_defs[id].type == "overlay" || menu_defs[id].type == "overlay_border") {
 		canvas.globalAlpha = 0.75
 		canvas.fillStyle = 'rgb(0, 0, 0)';
 		canvas.fillRect(0, 0, 256, 240)
 		canvas.globalAlpha = 1
-		canvas.fillStyle = 'rgb(255, 255, 255)';
-		canvas.fillRect(xpos-menu_defs[id].padding-1, ypos-menu_defs[id].padding-1, menu_defs[id].width+menu_defs[id].padding*2+2, menu_defs[id].height+menu_defs[id].padding*2+2)
+		if (menu_defs[id].type == "overlay_border") {
+			canvas.fillStyle = 'rgb(255, 255, 255)';
+			canvas.fillRect(xpos-menu_defs[id].padding-1, ypos-menu_defs[id].padding-1, menu_defs[id].width+menu_defs[id].padding*2+2, menu_defs[id].height+menu_defs[id].padding*2+2)
+		}
 		canvas.fillStyle = 'rgb(0, 0, 0)';
 		canvas.fillRect(xpos-menu_defs[id].padding, ypos-menu_defs[id].padding, menu_defs[id].width+menu_defs[id].padding*2, menu_defs[id].height+menu_defs[id].padding*2)
 	}
 	
 	//custom draw function
-	custom_draw()
+	custom_draw(id)
 	
 	//click options
 	if (menu_defs[id].click_options && menu_defs[id].click_options.length > 0) for (let i = 0; i < menu_defs[id].click_options.length; i++) {
@@ -87,24 +89,51 @@ function drawMenu(xpos, ypos, id, cursor=true, custom_draw=function(){}) {
 			menu_defs[id].img[i][4]				//height
 		)
 	}
+	
 	if (!(menu_defs[id].text.length == 0)) for (let i = 0; i < menu_defs[id].text.length; i++) {
 		canvas.globalAlpha = menu_defs[id].text[i][3]
 		drawText(xpos+menu_defs[id].text[i][1], ypos+menu_defs[id].text[i][2], menu_defs[id].text[i][0])
 		canvas.globalAlpha = 1
 	}
+	
 	if (!(menu_defs[id].text_shadowed.length == 0)) for (let i = 0; i < menu_defs[id].text_shadowed.length; i++) {
 		drawTextShadow(xpos+menu_defs[id].text_shadowed[i][1], ypos+menu_defs[id].text_shadowed[i][2], menu_defs[id].text_shadowed[i][0])
 	}
+	
+	if (menu_defs[id].variable && menu_defs[id].variable.length > 0) for (let i = 0; i < menu_defs[id].variable.length; i++) {
+		if (menu_defs[id].variable[i][0].length == 1) {
+			drawText(xpos+menu_defs[id].variable[i][1], ypos+menu_defs[id].variable[i][2], window[menu_defs[id].variable[i][0][0]].toString().toUpperCase())
+		}
+		if (menu_defs[id].variable[i][0].length == 2) {
+			drawText(xpos+menu_defs[id].variable[i][1], ypos+menu_defs[id].variable[i][2], window[menu_defs[id].variable[i][0][0]][menu_defs[id].variable[i][0][1]].toString().toUpperCase())
+		}
+		if (menu_defs[id].variable[i][0].length == 3) {
+			drawText(xpos+menu_defs[id].variable[i][1], ypos+menu_defs[id].variable[i][2], window[menu_defs[id].variable[i][0][0]][menu_defs[id].variable[i][0][1]][menu_defs[id].variable[i][0][2]].toString().toUpperCase())
+		}
+		if (menu_defs[id].variable[i][0].length == 4) {
+			drawText(xpos+menu_defs[id].variable[i][1], ypos+menu_defs[id].variable[i][2], window[menu_defs[id].variable[i][0][0]][menu_defs[id].variable[i][0][1]][menu_defs[id].variable[i][0][2]][menu_defs[id].variable[i][0][3]].toString().toUpperCase())
+		}
+		if (menu_defs[id].variable[i][0].length == 5) {
+			drawText(xpos+menu_defs[id].variable[i][1], ypos+menu_defs[id].variable[i][2], window[menu_defs[id].variable[i][0][0]][menu_defs[id].variable[i][0][1]][menu_defs[id].variable[i][0][2]][menu_defs[id].variable[i][0][3]][menu_defs[id].variable[i][0][4]].toString().toUpperCase())
+		}
+	}
+	
 	if (cursor) canvas.drawImage(img_text, 120, 8, 8, 8, xpos+menu_defs[id].options[menuOption][0], ypos+menu_defs[id].options[menuOption][1], 8, 8)
 	
 }
 
 function handleMenu(id, xpos=0, ypos=0) {
 	//keyMenu
-	if (keyboard.S || keyboard.D) menuOption += 1
-	if (keyboard.W || keyboard.A) menuOption -= 1
+	if (keyboard.S || (keyboard.D && !(menu_defs[id].right_action))) menuOption += 1
+	if (keyboard.W || (keyboard.A && !(menu_defs[id].left_action))) menuOption -= 1
 	if (keyboard.Space || keyboard.Enter) {
 		handleMenuAction(menu_defs[id].options[menuOption], 2)
+	}
+	if (keyboard.D && menu_defs[id].right_action && menu_defs[id].right_action[menuOption]) {
+		handleMenuAction(menu_defs[id].right_action[menuOption], 0)
+	}
+	if (keyboard.A && menu_defs[id].left_action && menu_defs[id].left_action[menuOption]) {
+		handleMenuAction(menu_defs[id].left_action[menuOption], 0)
 	}
 	if (menuOption > menu_defs[id].options.length-1) menuOption = menu_defs[id].options.length-1
 	if (menuOption < 0) menuOption = 0
@@ -136,10 +165,29 @@ function handleMenuAction(action, offset=2){
 		quitMenu()
 	}
 	if (action[offset] == "variable") {
-		window[action[offset+1]] = action[offset+2]
+		if (action[offset+1].length == 1) window[action[offset+1][0]] = action[offset+2]
+		if (action[offset+1].length == 2) window[action[offset+1][0]][action[offset+1][1]] = action[offset+2]
+		if (action[offset+1].length == 3) window[action[offset+1][0]][action[offset+1][1]][action[offset+1][2]] = action[offset+2]
+		if (action[offset+1].length == 4) window[action[offset+1][0]][action[offset+1][1]][action[offset+1][2]][action[offset+1][3]] = action[offset+2]
+		if (action[offset+1].length == 5) window[action[offset+1][0]][action[offset+1][1]][action[offset+1][2]][action[offset+1][3]][action[offset+1][4]] = action[offset+2]
 	}
 	if (action[offset] == "quick_layer") {
 		gameLayer = action[offset+1]
 		menus = []
 	}
+	if (action[offset] == "function") {
+		window[action[offset+1]](action[offset+2]);
+	}
+}
+
+function settings_add(params) {
+	if (level.settings[params[0]] < params[1] || !level.settings[params[1]]) 
+		level.settings[params[0]] += 1
+}
+function settings_sub(params) {
+	if (level.settings[params[0]] > params[1]) 
+		level.settings[params[0]] -= 1
+}
+function settings_toggle(params) {
+	level.settings[params[0]] = (!level.settings[params[0]])
 }

@@ -213,6 +213,7 @@ class GameLayer_Class {
 		Mario.deathtimer = 0
 		Mario.powerup = 0
 		Mario.iframes = 0
+		world_timer = level.settings.timer
 		Mario.dead = false
 		if (keyboard_onpress.Enter) {
 			gameLayer = "game_test"
@@ -247,15 +248,31 @@ class GameLayer_Class {
 			canvas.globalAlpha = 1
 		}
 		
-		this.customDrawFunc = function(){
-			
-			canvas.fillStyle = 'rgb(255, 255, 255)';
-			canvas.fillRect(7+20*buildMode, 19, 18, 18)
-			canvas.fillStyle = 'rgb(69, 69, 69)';
-			canvas.fillRect(8+20*buildMode, 20, 16, 16)
-			
-			canvas.fillStyle = 'rgb(0, 0, 0)';
-			canvas.fillRect(8, 40, 240, 176)
+		this.customDrawFunc = function(id){
+			if (id == "edit_menu") {
+				canvas.fillStyle = 'rgb(255, 255, 255)';
+				canvas.fillRect(7+20*buildMode, 19, 18, 18)
+				canvas.fillStyle = 'rgb(69, 69, 69)';
+				canvas.fillRect(8+20*buildMode, 20, 16, 16)
+				
+				canvas.fillStyle = 'rgb(0, 0, 0)';
+				canvas.globalAlpha = 0.5
+				canvas.fillRect(8, 40, 240, 176)
+				canvas.globalAlpha = 1
+				if (buildMode == 0) for (let i = 1; i-1 < tile_defs.length; i++) {
+					canvas.drawImage(
+						img_tileset,
+						tile_defs[i-1].tileX*16,
+						tile_defs[i-1].tileY*16,
+						16,
+						16,
+						8+mod(i-1,16)*16,
+						40+Math.trunc(i/16)*16,
+						16,
+						16
+					)
+				}
+			}
 		}
 		
 		//marioStart
@@ -297,7 +314,7 @@ class GameLayer_Class {
 	game_test_draw() {
 		g_layer.game_draw()
 		canvas.globalAlpha = 0.5
-		drawText(8, 26, "TEST MODE: PRESS ENTER TO EDIT")
+		drawText(8, 26+(debug_mode*24), "TEST MODE: PRESS ENTER TO EDIT")
 		canvas.globalAlpha = 1
 	}
 	global_update() {
@@ -320,12 +337,12 @@ class GameLayer_Class {
 	global_draw_pre() {
 		canvas.fillStyle = 'rgb(92, 148, 252)';
 		canvas.fillRect(0, 0, 256, 240);
-		this.customDrawFunc = function(){}
+		this.customDrawFunc = function(id){}
 	}
 	global_draw() {
 		if (!(menus.length == 0)) {
 			for (let i = 1; i < menus.length; i++) {
-				drawMenu(menus[i-1][0], menus[i-1][1], menus[i-1][2], false)
+				drawMenu(menus[i-1][0], menus[i-1][1], menus[i-1][2], false, this.customDrawFunc)
 			}
 			drawMenu(menus[menus.length-1][0], menus[menus.length-1][1], menus[menus.length-1][2], menus[menus.length-1][3], this.customDrawFunc)
 		}
@@ -393,6 +410,13 @@ function addMenu(x, y, id, cursor=true) {
 function quitMenu() {
 	menus.pop()
 	menuOption = 0
+}
+
+function selectTile(params) {
+	if (buildMode == 0 && tile_defs[Math.trunc((mouse[0]-8)/16)+Math.trunc((mouse[1]-40)/16)*16]) {
+		tileBrush = Math.trunc((mouse[0]-8)/16)+Math.trunc((mouse[1]-40)/16)*16
+		quitMenu();
+	}
 }
 
 function loadEnemies() {

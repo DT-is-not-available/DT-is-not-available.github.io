@@ -44,7 +44,7 @@
 		"click_options": []
 	},
 	"pause": {
-		"type": "overlay",
+		"type": "overlay_border",
 		"width": 128,
 		"height": 56,
 		"padding": 8,
@@ -67,7 +67,7 @@
 		"click_options": []
 	},
 	"locked_pause": {
-		"type": "overlay",
+		"type": "overlay_border",
 		"width": 128,
 		"height": 56,
 		"padding": 8,
@@ -110,8 +110,51 @@
 		"click_options": [
 			["button", ["TEST", 36, 12], 0, 212, "layer", "game_test"],
 			["button", ["QUIT", 36, 12], 204, 212, "layer", "menu"],
-			["button", [" ", 16, 16, true], 0, 12, "variable", "buildMode", 0],
-			["button", [" ", 16, 16, true], 20, 12, "variable", "buildMode", 1]
+			["button", ["s", 14, 14], 226, 0, "menu", 16, 16, "level_options", true],
+			["button", [" ", 16, 16, true], 0, 12, "variable", ["buildMode"], 0],
+			["button", [" ", 16, 16, true], 20, 12, "variable", ["buildMode"], 1],
+			["button", [" ", 240, 176, true], 0, 32, "function", "selectTile", []]
+		]
+	},
+	"level_options": {
+		"type": "overlay",
+		"width": 224,
+		"height": 208,
+		"padding": 4,
+		"pauses": false,
+		"esc_close": true,
+		"text": [
+			["LEVEL SETTINGS", 0, 0],
+			["PRESS ESC TO EXIT", 0, 200],
+			["CAMERA:", 16, 16],
+			["ENEMY HIGH JUMP:", 16, 24],
+			["WIDTH:", 16, 32],
+			["HEIGHT:", 16, 40]
+		],
+		"variable": [
+			[["level", "settings", "camera"], 80, 16, false],
+			[["level", "settings", "enemy_high_jump"], 152, 24, false],
+			[["level", "settings", "width"], 72, 32, false],
+			[["level", "settings", "height"], 80, 40, false]
+		],
+		"text_shadowed": [],
+		"options": [
+			[0, 16, "disabled"],
+			[0, 24, "function", "settings_toggle", ["enemy_high_jump", 0]],
+			[0, 32, "disabled"],
+			[0, 40, "disabled"]
+		],
+		"left_action": [
+			["function", "settings_sub", ["camera", 0]],
+			["disabled"],
+			["function", "settings_sub", ["width", 0]],
+			["function", "settings_sub", ["height", 0]]
+		],
+		"right_action": [
+			["function", "settings_add", ["camera", 2]],
+			["disabled"],
+			["function", "settings_add", ["width"]],
+			["function", "settings_add", ["height"]]
 		]
 	}
 }

@@ -14,7 +14,7 @@ setScaleAuto();
 window.addEventListener('resize', setScaleAuto) 
 
 var filesLoaded = 0;
-var filesNeeded = 17;
+var filesNeeded = 18;
 
 var xhttp = new XMLHttpRequest();
 // new file
@@ -30,6 +30,22 @@ xhttp.onreadystatechange = function() {
 	}
 };
 xhttp.open("GET", "./json/tiles.json", true);
+xhttp.send();
+
+var xhttp = new XMLHttpRequest();
+// new file
+xhttp.onreadystatechange = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		console.log("JSON Contents:");
+		console.log(JSON.parse(this.responseText));
+		edit_menu = JSON.parse(this.responseText);
+		filesLoaded += 1
+		if (filesLoaded >= filesNeeded) {
+			startGame();
+		}
+	}
+};
+xhttp.open("GET", "./json/editmenu.json", true);
 xhttp.send();
 
 var xhttp = new XMLHttpRequest();
