@@ -6,6 +6,19 @@ function onscreen(hitbox_1, x_p, y_p) {
 	return overlap(hitbox_1, x_p, y_p, {X_pos: 256, X_neg: 0, Y_pos: 240, Y_neg: 0}, Math.round(camera_x), Math.round(camera_y))
 }
 
+function download_file(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
 function mod(x, y) {return x - y * Math.floor(x / y)}
 
 function overlap(r1, x1, y1, r2, x2, y2) {
@@ -64,10 +77,10 @@ function getOffset( el ) {
     return { top: _y, left: _x };
 }
 
-function readJSON(file) {
+function readLevel(file) {
   const reader = new FileReader();
   reader.addEventListener('load', (event) => {
-    level = JSON.parse(event.target.result);
+    level = JSON.parse(atob(event.target.result));
 	g_layer.edit()
   });
   reader.readAsText(file);
@@ -174,11 +187,13 @@ canvas.addEventListener('mousemove', function(event) {
 //mouse input
 
 canvas.addEventListener('mousedown', function(event) {
+	if (!mouseButtons[event.button]) mouseButtons_onpress[event.button] = true
 	mouseButtons[event.button] = true
 });
 
 canvas.addEventListener('mouseup', function(event) {
 	mouseButtons[event.button] = false
+	mouseButtons_onpress[event.button] = false
 });
 
 canvas.addEventListener('contextmenu', event => event.preventDefault());

@@ -5,6 +5,7 @@ var debug_mode = false
 var timemod = 1;
 keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false}
 mouseButtons = [false, false, false]
+mouseButtons_onpress = [false, false, false]
 mouse = [0, 0]
 loopStarted = false
 
@@ -95,7 +96,7 @@ xhttp.onreadystatechange = function() {
 xhttp.open("GET", "./json/menus.json", true);
 xhttp.send();
 
-const img_tileset = new Image();
+img_tileset = new Image();
 // new file
 img_tileset.src = 'images/tileset.png';
 img_tileset.onload = function() {
@@ -105,7 +106,7 @@ img_tileset.onload = function() {
 	}
 };
 
-const img_particles = new Image();
+img_particles = new Image();
 // new file
 img_particles.src = 'images/particles.png';
 img_particles.onload = function() {
@@ -115,7 +116,7 @@ img_particles.onload = function() {
 	}
 };
 
-const img_error = new Image();
+img_error = new Image();
 // new file
 img_error.src = 'images/error.png';
 img_error.onload = function() {
@@ -125,7 +126,7 @@ img_error.onload = function() {
 	}
 };
 
-const img_flagpole = new Image();
+img_flagpole = new Image();
 // new file
 img_flagpole.src = 'images/flag.png';
 img_flagpole.onload = function() {
@@ -135,7 +136,7 @@ img_flagpole.onload = function() {
 	}
 };
 
-const img_markers = new Image();
+img_markers = new Image();
 // new file
 img_markers.src = 'images/markerui.png';
 img_markers.onload = function() {
@@ -145,7 +146,7 @@ img_markers.onload = function() {
 	}
 };
 
-const img_mario = new Image();
+img_mario = new Image();
 // new file
 img_mario.src = 'images/mario.png';
 img_mario.onload = function() {
@@ -155,7 +156,7 @@ img_mario.onload = function() {
 	}
 };
 
-const img_grid = new Image();
+img_grid = new Image();
 // new file
 img_grid.src = 'images/grid.png';
 img_grid.onload = function() {
@@ -165,7 +166,7 @@ img_grid.onload = function() {
 	}
 };
 
-const img_tileAnimation = new Image();
+img_tileAnimation = new Image();
 // new file
 img_tileAnimation.src = 'images/tileAnimation.png';
 img_tileAnimation.onload = function() {
@@ -175,7 +176,7 @@ img_tileAnimation.onload = function() {
 	}
 };
 
-const img_sprites = new Image();
+img_sprites = new Image();
 // new file
 img_sprites.src = 'images/sprites.png';
 img_sprites.onload = function() {
@@ -185,7 +186,7 @@ img_sprites.onload = function() {
 	}
 };
 
-const img_title = new Image();
+img_title = new Image();
 // new file
 img_title.src = 'images/title.png';
 img_title.onload = function() {
@@ -195,7 +196,7 @@ img_title.onload = function() {
 	}
 };
 
-const img_text = new Image();
+img_text = new Image();
 // new file
 img_text.src = 'images/text.png';
 img_text.onload = function() {
@@ -205,7 +206,7 @@ img_text.onload = function() {
 	}
 };
 
-const img_text_shadow = new Image();
+img_text_shadow = new Image();
 // new file
 img_text_shadow.src = 'images/text2.png';
 img_text_shadow.onload = function() {

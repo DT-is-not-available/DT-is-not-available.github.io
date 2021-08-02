@@ -4,6 +4,18 @@ body {
   font-family: 'Press Start 2P';
   font-size: 16px;
   line-height: 0;
+  -moz-user-select: none; 
+  -webkit-user-select: none; 
+  -ms-user-select: none; 
+  user-select: none;
+  -o-user-select: none;
+}
+.debug {
+  -moz-user-select: text; 
+  -webkit-user-select: text; 
+  -ms-user-select: text; 
+  user-select: text;
+  -o-user-select: text;
 }
 input[type=range] {
     -webkit-appearance: none;
@@ -16,7 +28,7 @@ input[type=range] {
    }
 input[type=range]:hover {
     opacity: 2;
-    background: #444444;
+    background: #454545;
 }
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -36,7 +48,7 @@ button {
   outline: none;
 }
 button:hover {
-  background: #444444 !important;
+  background: #454545 !important;
   background: solid;
 }
 input[type=file]::before {
@@ -52,7 +64,7 @@ input[type=file]::before {
   white-space: nowrap;
 }
 input[type=file]:hover::before {
-  background: #444444 !important;
+  background: #454545 !important;
   background: solid;
 }
 input[type=file]::-webkit-file-upload-button {

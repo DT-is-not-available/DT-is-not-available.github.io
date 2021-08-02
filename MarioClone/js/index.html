@@ -16,10 +16,12 @@
 	<p>Sorry, but this browser is unable to display the game window due to it being outdated. Please try using a new browser like Chrome, Firefox, or Opera GX. Do not use internet explorer because it will most likely not work.</p>
 	</canvas>
 	<script>
+/*
 window.addEventListener("error",function(err) {
 	var errorMessage = "" + err.message + " - " + err.filename + " - line " + err.lineno + " - col " + err.colno;
 	console.error("Oh no, an error occured:\n" + errorMessage);
 });
+*/
 	</script>
     <script src="javascript/util.js"></script>
     <script src="javascript/tilemap_draw.js"></script>
@@ -97,14 +99,16 @@ speedslider.oninput = function() {
 	  <button onclick="g_layer.game(); this.blur();">g_layer.game</button><br>
 	  <button onclick="g_layer.edit(); this.blur();">g_layer.edit</button><br>
 	  <button onclick="g_layer.game_test(); this.blur();">g_layer.game_test</button>
-	</div><br><p>
-	<input type="file" id="level_upload" onclick="this.blur();" accept=".json"></input>
+	</div><br><p><br>
+	<button class="levelButtons" onclick="download_file('level.lvl2', btoa(JSON.stringify(level))); this.blur();">SAVE LEVEL</button><br>
+	<input class="levelButtons" type="file" id="level_upload" onclick="this.blur();" accept=".json"></input><br>
+	<button class="levelButtons" onclick="window.open('localhost:8000#'+btoa(JSON.stringify(level))); this.blur();">EXPORT LEVEL</button>
 	<script>
 const levelUpload = document.getElementById('level_upload');
 levelUpload.addEventListener('change', (event) => {
 	const fileList = event.target.files;
 	console.log(fileList);
-	readJSON(fileList[0]);
+	readLevel(fileList[0]);
 });
 	</script>
 	<script>
@@ -147,6 +151,16 @@ coll[0].addEventListener("click", function() {
     content.style.display = "block";
   }
 });
+	</script>
+	<script>
+if(window.location.hash) {
+document.getElementsByClassName('collapsible2')[0].style.display = 'none'
+document.getElementsByClassName('collapsible3')[0].style.display = 'none'
+var all = document.getElementsByClassName('levelButtons');
+for (var i = 0; i < all.length; i++) {
+  all[i].style.display = 'none';
+}
+}
 	</script>
   </body>
 </html>

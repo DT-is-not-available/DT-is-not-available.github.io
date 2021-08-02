@@ -1,4 +1,8 @@
 class GameLayer_Class {
+	constructor() {
+		this.customDrawFunc = function(){}
+		this.doGlobal = true
+	}
 	game() {
 		gameLayer = "game"
 		startGame()
@@ -6,7 +10,8 @@ class GameLayer_Class {
 	game_update() {
 		
 		//pause menu
-		if (keyboard_onpress.Escape) addMenu(64, 92, "pause")
+		if (keyboard_onpress.Escape && !window.location.hash && gameLayer == "game") addMenu(64, 92, "pause")
+		if (keyboard_onpress.Escape && window.location.hash && gameLayer == "game") addMenu(64, 92, "locked_pause")
 		
 		//mario
 		Mario.game();
@@ -107,9 +112,6 @@ class GameLayer_Class {
 	}
 	game_draw() {
 		
-		canvas.fillStyle = 'rgb(92, 148, 252)';
-		canvas.fillRect(0, 0, 256, 240);
-		
 		drawTileSet(level.temptiles);
 		
 		//enemies
@@ -140,7 +142,7 @@ class GameLayer_Class {
 		
 		if (!debug_mode) {
 			drawText(0, 8, "   MARIO          WORLD  TIME")
-			drawText(0, 16, "   "+Mario.score.toString().padStart(6,'0').padEnd(8,' ')+" x"+mod(Mario.coins,100).toString().padStart(2,'0')+"    1-1  "+Math.trunc(world_timer).toString().padStart(3,'0').padStart(5,' '))
+			drawText(0, 16, "   "+Mario.score.toString().padStart(6,'0').padEnd(8,' ')+" x"+Mario.coins.toString().padStart(2,'0')+"    1-1  "+Math.trunc(world_timer).toString().padStart(3,'0').padStart(5,' '))
 			canvas.drawImage(img_text, [136, 136, 136, 136+8, 136+16, 136+8][mod(Math.round(tileanim_timer), 6)], 8, 8, 8, 88, 16, 8, 8)
 		}
 		
@@ -150,7 +152,14 @@ class GameLayer_Class {
 		startGame()
 	}
 	menu_update() {
-		if (menus.length == 0) menus = [[64, 136, "main_menu"]]
+		tileanim_timer += 0.035
+		if(window.location.hash) {
+			if (menus.length == 0) menus = [[64, 136, "locked_main_menu"]]
+			// hash found
+		} else {
+			if (menus.length == 0) menus = [[64, 136, "main_menu"]]
+			// No hash found
+		}
 		camera_x += 0.1
 		if (camera_x > level.settings.width*16+256) camera_x = -256
 		camera_y = 0
@@ -158,9 +167,7 @@ class GameLayer_Class {
 		window.title_yv += -(Math.abs(window.title_y)/window.title_y)*0.01
 	}
 	menu_draw() {
-		
-		canvas.fillStyle = 'rgb(92, 148, 252)';
-		canvas.fillRect(0, 0, 256, 240);
+	
 		drawTileSet(level.tiles);
 		//canvas.drawImage(image, image x, image y, image width, image height, x pos, y pos, width, height)
 		canvas.drawImage(img_title, 1, 91, 184, 88, 36, 28+Math.round(window.title_y), 184, 88);
@@ -172,6 +179,8 @@ class GameLayer_Class {
 		startGame()
 	}
 	edit_update() {
+		//edit menu
+		if (keyboard_onpress.Escape && !window.location.hash) addMenu(8, 8, "edit_menu", false)
 		enemies = []
 		this.cameraspeed = 0.5
 		if (keyboard.Shift) this.cameraspeed += 1.5
@@ -212,28 +221,42 @@ class GameLayer_Class {
 			loadEnemies();
 		}
 		tileanim_timer += 0.035
-		if (mouseButtons[0]) {
-			level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)] = tileBrush
-		}
-		if (mouseButtons[2]) {
-			delete(level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)])
+		
+		//tile building
+		if (buildMode == 0) {
+			if (mouseButtons[0]) {
+				level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)] = tileBrush
+			}
+			if (mouseButtons[2]) {
+				delete(level.tiles[Math.trunc((mouse[0]+camera_x)/16)+","+Math.trunc((mouse[1]+camera_y)/16)])
+			}
 		}
 	}
 	edit_draw() {
 		
-		canvas.fillStyle = 'rgb(92, 148, 252)';
-		canvas.fillRect(0, 0, 256, 240);
-		
 		//grid
 		canvas.drawImage(img_grid, mod(-Math.round(camera_x), 16)-16, mod(-Math.round(camera_y), 16)-16);
 		
-		//tilepreview
-		canvas.globalAlpha = 0.5
-		canvas.drawImage(img_tileset, tile_defs[tileBrush].tileX*16, tile_defs[tileBrush].tileY*16, 16, 16, Math.trunc((mouse[0]+camera_x)/16)*16-camera_x, Math.trunc((mouse[1]+camera_y)/16)*16-camera_y, 16, 16);
-		canvas.globalAlpha = 1
-		
 		//tiles		
 		drawTileSet(level.tiles);
+		
+		//tilepreview
+		if (buildMode == 0) {
+			canvas.globalAlpha = 0.5
+			canvas.drawImage(img_tileset, tile_defs[tileBrush].tileX*16, tile_defs[tileBrush].tileY*16, 16, 16, Math.trunc((mouse[0]+camera_x)/16)*16-camera_x, Math.trunc((mouse[1]+camera_y)/16)*16-camera_y, 16, 16);
+			canvas.globalAlpha = 1
+		}
+		
+		this.customDrawFunc = function(){
+			
+			canvas.fillStyle = 'rgb(255, 255, 255)';
+			canvas.fillRect(7+20*buildMode, 19, 18, 18)
+			canvas.fillStyle = 'rgb(69, 69, 69)';
+			canvas.fillRect(8+20*buildMode, 20, 16, 16)
+			
+			canvas.fillStyle = 'rgb(0, 0, 0)';
+			canvas.fillRect(8, 40, 240, 176)
+		}
 		
 		//marioStart
 		canvas.drawImage(img_markers, 0, 0, 16, 16, level.marioX-8-camera_x, level.marioY-15-camera_y, 16, 16)
@@ -267,7 +290,7 @@ class GameLayer_Class {
 	}
 	game_test_update() {
 		g_layer.game_update()
-		if (keyboard_onpress.Enter || Mario.deathtimer > 240) {
+		if (keyboard_onpress.Enter || keyboard_onpress.Escape || Mario.deathtimer > 240) {
 			gameLayer = "edit"
 		}
 	}
@@ -278,9 +301,7 @@ class GameLayer_Class {
 		canvas.globalAlpha = 1
 	}
 	global_update() {
-		if (!(menus.length == 0)) {
-			handleMenu(menus[menus.length-1][2])
-		}
+		mouseButtons_onpress = [false, false, false]
 		keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false}
 		debug[0].innerHTML = "X: "+Math.round(Mario.entity.x*100)/100
 		debug[1].innerHTML = "Y: "+Math.round(Mario.entity.y*100)/100
@@ -291,12 +312,22 @@ class GameLayer_Class {
 		debug[6].innerHTML = "M: "+mouse
 		tpstick += 1
 	}
+	global_update_pre() {
+		if (!(menus.length == 0)) {
+			handleMenu(menus[menus.length-1][2], menus[menus.length-1][0], menus[menus.length-1][1])
+		}
+	}
+	global_draw_pre() {
+		canvas.fillStyle = 'rgb(92, 148, 252)';
+		canvas.fillRect(0, 0, 256, 240);
+		this.customDrawFunc = function(){}
+	}
 	global_draw() {
 		if (!(menus.length == 0)) {
 			for (let i = 1; i < menus.length; i++) {
 				drawMenu(menus[i-1][0], menus[i-1][1], menus[i-1][2], false)
 			}
-			drawMenu(menus[menus.length-1][0], menus[menus.length-1][1], menus[menus.length-1][2], menus[menus.length-1][3])
+			drawMenu(menus[menus.length-1][0], menus[menus.length-1][1], menus[menus.length-1][2], menus[menus.length-1][3], this.customDrawFunc)
 		}
 		if (!debug_mode) {
 			canvas.globalAlpha = 0.5
@@ -322,6 +353,10 @@ function startGame(menu_stack=[]) {
 	menuOption = 0;
 	title_yv = 2;
 	title_y = 0;
+	if(window.location.hash) {
+		hash = window.location.hash.substring(1); //Puts hash in variable, and removes the # character
+		level = JSON.parse(atob(hash))
+	}
 	level.temptiles = JSON.parse(JSON.stringify(level.tiles))
 	Mario = new Mario_Class(level.marioX,level.marioY)
 	particles = []
@@ -334,7 +369,6 @@ function startGame(menu_stack=[]) {
 	if (!loopStarted) {
 		g_layer = new GameLayer_Class
 		gameLayer = "menu" //g_layer.menu();
-		menus = [[64, 136, "main_menu"]]
 		fpstick = 59
 		currentfps = 60
 		tpstick = 239
@@ -343,12 +377,15 @@ function startGame(menu_stack=[]) {
 		renderloop();
 		fpsloop();
 		console.log("Game Starting")
+		buildMode = 0
 	}
 	console.log("\""+gameLayer+"\" Layer Starting")
 	loopStarted = true
 }
 
 function addMenu(x, y, id, cursor=true) {
+	keyboard = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false}
+	keyboard_onpress = {W: false, S: false, A: false, D: false, Space: false, Shift: false, Enter: false, Escape: false}
 	menus.push([x, y, id, cursor])
 	menuOption = 0
 }
@@ -371,10 +408,11 @@ function loadEnemies() {
 
 function gameloop() {
 	window.setTimeout(gameloop, 1000/(240*timemod));
+	if (g_layer.doGlobal) g_layer.global_update_pre();
 	if (menus.length == 0 || !menu_defs[menus[menus.length-1][2]].pauses) {
-		g_layer[gameLayer+"_update"]();
+		if (g_layer[gameLayer] && gameLayer != "global") g_layer[gameLayer+"_update"]();
 	}
-	g_layer.global_update();
+	if (g_layer.doGlobal) g_layer.global_update();
 }
 
 function fpsloop() {
@@ -388,13 +426,15 @@ function fpsloop() {
 
 function renderloop() {
 	window.setTimeout(renderloop, 1000/fps);
-	g_layer[gameLayer+"_draw"]();
-	g_layer.global_draw();
+	if (g_layer.doGlobal) g_layer.global_draw_pre();
+	if (g_layer[gameLayer] && gameLayer != "global") g_layer[gameLayer+"_draw"]();
+	if (g_layer.doGlobal) g_layer.global_draw();
 }
 
 function activateTile(x, y) {
 	level.temptiles[x+","+y] = tile_defs[level.temptiles[x+","+y]].interaction.hitTile
 //Particle_class(xpos, ypos, xv, yv, imgX, imgY, imgW, imgH, gravity, lifetime, frames, speed)
 	particles.push(new Particle_class((x+0.5)*16, y*16, 0, -7, 32, 8, 8, 14, 0.45, 30, 4, 3))
+	Mario.coins += 1
 	hit_block = new Block_class(x, y)
 }
