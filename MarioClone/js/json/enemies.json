@@ -22,7 +22,7 @@
 			"frameX": 32,
 			"frameY": 0
 		},
-		"hitbox": {"X_neg": 6, "X_pos": 6, "Y_neg": 12, "Y_pos": 0},
+		"hitbox": {"X_neg": 5, "X_pos": 5, "Y_neg": 10, "Y_pos": 0},
 		"tilecollision": true,
 		"enemycollision": true
 	},

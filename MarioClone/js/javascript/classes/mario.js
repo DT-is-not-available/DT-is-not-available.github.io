@@ -1,7 +1,7 @@
 class Mario_Class {
 	constructor(xpos, ypos) {
 		//create mario entity
-		this.entity = new Generic_entity_class(xpos, ypos, {X_neg: 6, X_pos: 6, Y_neg: 14, Y_pos: 0})
+		this.entity = new Generic_entity_class(xpos, ypos, {X_neg: 6, X_pos: 6, Y_neg: 14, Y_pos: 0}, this)
 
 		//default properties
 		this.mirror = false
@@ -15,7 +15,6 @@ class Mario_Class {
 		this.entity.up_gravity = 0.25
 		this.deathtimer = 0
 		this.iframes = 0
-		this.entity.tilecollisiontype = "mario_small"
 		this.score = 0
 		this.coins = 0
 		this.enemy_combo = -1
@@ -26,10 +25,8 @@ class Mario_Class {
 	game() {
 		if (!this.dead && !this.freezeWorld) {
 			if (this.powerup == 0) {
-				this.entity.tilecollisiontype = "mario_small"
 				this.entity.hitbox = {X_neg: 6, X_pos: 6, Y_neg: 14, Y_pos: 0}
 			} else {
-				this.entity.tilecollisiontype = "mario_big"
 				this.entity.hitbox = {X_neg: 6, X_pos: 6, Y_neg: 30, Y_pos: 0}
 			}
 			this.entity.game()

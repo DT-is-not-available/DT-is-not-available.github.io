@@ -24,9 +24,10 @@ class Baddie_Class {
 		this.direction = -1
 		this.deathtimer = 0
 		this.dead = false
+		this.enemyid = id
 		
 		//create the entity
-		this.entity = new Generic_entity_class(xpos, ypos, this.hitbox)
+		this.entity = new Generic_entity_class(xpos, ypos, this.hitbox, this)
 		this.entity.gravity = this.gravity
 		this.entity.tilecollision = this.tilecollision
 	

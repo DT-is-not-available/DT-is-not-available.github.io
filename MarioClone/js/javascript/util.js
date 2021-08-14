@@ -66,6 +66,9 @@ function setScaleFit() {
 	setScale((window.innerHeight)/256);
 }
 
+function posToTile(coord) {return Math.trunc(coord/16)}
+function tileToPos(coord) {return Math.trunc(coord)*16}
+
 function getOffset( el ) {
     var _x = 0;
     var _y = 0;
