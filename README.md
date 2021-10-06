@@ -6,7 +6,7 @@ im too lazy to make a real website so here you go
 
 my youtube channel that i will eventually upload to: https://www.youtube.com/channel/UC_N0MiNEsCretIVZV_xuThg
 
-cool mario thing: https://gdengine.github.io/MarioClone/js
+cool mario thing: https://gdengine.github.io/Toolbox-JS
 
 cool stocks thing: https://gdengine.github.io/Stocks
 
