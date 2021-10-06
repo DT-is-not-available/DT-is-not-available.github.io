@@ -1,0 +1,5 @@
+<iframe src="https://www.example.com" id="iframe" width=1000 height=600></iframe>
+<div></div>
+<button type="button" onclick="iframe.src(prompt('please type a valid url'))">Change URL</button>
+<button type="button" onclick="iwindow.eval(prompt('please type any valid javascript'))">Run Javascript</button>
+<button type="button" onclick="iframe = document.getElementById('iframe');iwindow = document.getElementById('iframe').contentWindow;">Load JS</button>
