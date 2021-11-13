@@ -28,6 +28,36 @@ function load() {
 		data.project[5][1][6][1][14][4][5][3] = gameTitleBelow.value
 		Result.innerHTML = JSON.stringify(data)
 	})
+	
+	gameTitleBelow = document.getElementById("gameTitleBelowShadow")
+	gameTitleBelow.addEventListener('change', function(){
+		data.project[5][1][6][1][14][3][5][3] = gameTitleBelow.value
+		Result.innerHTML = JSON.stringify(data)
+	})
+	
+	startingLayout = document.getElementById("Starting Layout")
+	startingLayout.addEventListener('change', function(){
+		data.project[1] = startingLayout.value
+		Result.innerHTML = JSON.stringify(data)
+	})
+	
+	shop1 = document.getElementById("shop1")
+	shop1.addEventListener('change', function(){
+		data.project[5][4][6][0][14][5][3][0][0] = shop1.value.replace(/\n/g, ";");
+		Result.innerHTML = JSON.stringify(data)
+	})
+	
+	shop2 = document.getElementById("shop2")
+	shop2.addEventListener('change', function(){
+		data.project[5][5][6][0][14][5][3][0][0] = shop2.value.replace(/\n/g, ";");
+		Result.innerHTML = JSON.stringify(data)
+	})
+	
+	shop3 = document.getElementById("shop3")
+	shop3.addEventListener('change', function(){
+		data.project[5][6][6][0][14][5][3][0][0] = shop3.value.replace(/\n/g, ";");
+		Result.innerHTML = JSON.stringify(data)
+	})
 }
 function playMod() {
 	alert("Coming Soon!")
