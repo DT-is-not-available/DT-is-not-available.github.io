@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1636681355,
+	"version": 1636760287,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -76,6 +76,7 @@
 		"images/bosshpbg.png",
 		"images/bosshp-sheet0.png",
 		"images/crossedout-sheet0.png",
+		"images/discord-sheet0.png",
 		"media/everything is happy.m4a",
 		"media/everything is happy.ogg",
 		"media/nothing here.m4a",
