@@ -1,5 +1,5 @@
 ﻿{
-	"version": 1636760287,
+	"version": 1637463847,
 	"fileList": [
 		"data.js",
 		"c2runtime.js",
@@ -67,8 +67,6 @@
 		"images/puzzlesquarepieces.png",
 		"images/healthbeam.png",
 		"images/healcrystal-sheet0.png",
-		"images/healcrystal-sheet1.png",
-		"images/healcrystal-sheet2.png",
 		"images/torch-sheet0.png",
 		"images/shakybridge.png",
 		"images/wizardprojectile-sheet0.png",
@@ -77,6 +75,11 @@
 		"images/bosshp-sheet0.png",
 		"images/crossedout-sheet0.png",
 		"images/discord-sheet0.png",
+		"images/damage.png",
+		"images/mobileinv-sheet0.png",
+		"images/mobileattack-sheet0.png",
+		"images/mobilejoystickbg-sheet0.png",
+		"images/mobilejoystick-sheet0.png",
 		"media/everything is happy.m4a",
 		"media/everything is happy.ogg",
 		"media/nothing here.m4a",
