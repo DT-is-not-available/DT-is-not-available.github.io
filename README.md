@@ -6,14 +6,14 @@ im too lazy to make a real website so here you go
 
 my youtube channel that i will eventually upload to: https://www.youtube.com/channel/UC_N0MiNEsCretIVZV_xuThg
 
-cool mario thing: https://gdengine.github.io/Toolbox-JS
+cool mario thing: https://dt-is-not-available.github.io/Toolbox-JS
 
-cool stocks thing: https://gdengine.github.io/Stocks
+cool stocks thing: https://dt-is-not-available.github.io/Stocks
 
-a 2d minecraft thing i made ages ago: https://gdengine.github.io/Minecraft2D/
+a 2d minecraft thing i made ages ago: https://dt-is-not-available.github.io/Minecraft2D/
 
-completely forgotten project: https://gdengine.github.io/unfairmario (passcode is unfair4570, you will see what i mean when you get there)
+completely forgotten project: https://dt-is-not-available.github.io/unfairmario (passcode is unfair4570, you will see what i mean when you get there)
 
-another forgotten project, only this one is kinda complete: https://gdengine.github.io/GDBE (first ever project posted here)
+another forgotten project, only this one is kinda complete: https://dt-is-not-available.github.io/GDBE (first ever project posted here)
 
-old mario thing: https://gdengine.github.io/MarioClone
+old mario thing: https://dt-is-not-available.github.io/MarioClone
