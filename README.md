@@ -2,7 +2,7 @@
 
 hey so this is my github
 
-im too lazy to make a real website so here you go
+i made a real website https://insert.games/ you should go there instead of here
 
 my youtube channel that i will eventually upload to: https://www.youtube.com/channel/UC_N0MiNEsCretIVZV_xuThg
 
