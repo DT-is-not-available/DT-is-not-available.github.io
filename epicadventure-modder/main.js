@@ -68,28 +68,29 @@ let projectTemplate = {
 function verbosify(source, template, ignorenumbers=false) {
     let ret = {}
     for (const [k, v] of Object.entries(template)) {
-		if (ignorenumbers & k == parseInt(k)) continue
-        if (typeof v === "object" && typeof v != null) {
-            if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
-            const nk = k.replace("$","")
-            if (Array.isArray(v)) {
-                ret[nk] = []
-                const sa = source[template[nk]]
-                for (let i = 0; i < sa.length; i++) {
-                    ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
-                }
-            } else {
-                ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
-            }
-        } else {
-            if (typeof source[v] === "object") {
-				Object.defineProperty(ret, k, {
-					writable: false,
-					enumerable: false,
-					value: source[v]
-				})
-			} else ret[k] = source[v]
-        }
+		if (!ignorenumbers || k != parseInt(k)) {
+        	if (typeof v === "object" && typeof v != null) {
+            	if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
+            	const nk = k.replace("$","")
+            	if (Array.isArray(v)) {
+            	    ret[nk] = []
+            	    const sa = source[template[nk]]
+            	    for (let i = 0; i < sa.length; i++) {
+            	        ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
+            	    }
+            	} else {
+            	    ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
+            	}
+        	} else {
+            	if (typeof source[v] === "object") {
+					Object.defineProperty(ret, k, {
+						writable: false,
+						enumerable: false,
+						value: source[v]
+					})
+				} else ret[k] = source[v]
+        	}
+		}
     }
     return ret
 }
