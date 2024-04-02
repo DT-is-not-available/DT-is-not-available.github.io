@@ -2,110 +2,109 @@ let data
 let project
 
 let projectTemplate = {
-    0:0,
-    startingLayout: 1,
-    2:2,
-    objects: 3,
-    4:4,
-    layouts: 5,
-    $layouts: [{
-        name: 0,
-        width: 1,
-        height: 2,
-        unboundedScrolling: 3,
-        eventSheet: 4,
-        globalID: 5,
-        layers: 6,
-        $layers: [{
-            name: 0,
-            index: 1,
-            globalID: 2,
-            3:3,
-            backgroundColor: 4,
-            5:5,
-            paralaxX: 6,
-            paralaxY: 7,
-            8:8, 9:9, 10:10, 11:11, 12:12, 13:13,
-            objects: 14,
-            $objects: [{
-                generalProperties: 0,
-                $generalProperties: [{
-                    x: 0,
-                    y: 1,
-                    2:2,
-                    width: 3,
-                    height: 4,
-                    5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11,
-                    effects: 12,
-                }],
-                objectType: 1,
-                UID: 2,
-                instanceVariables: 3,
-                $instanceVariables: [{
-                    value: 0,
-                }],
-                4:4,
-                properties: 5,
-            }],
-            15:15,
-        }],
-        7:7,
-        8:8,
-    }],
-    eventSheets: 6,
-    media: 7,
-    mediaPath: 8,
-    9:9,
-    viewportWidth: 10,
-    viewportHeight: 11,
-    12:12, 13:13, 14:14, 15:15,
-    version: 16,
-    17:17, 18:18, 19:19, 20:20, 21:21, 22:22, 23:23, 24:24, 25:25,
-    projectName: 26,
-    27:27, 28:28
+	0:0,
+	startingLayout: 1,
+	2:2,
+	objects: 3,
+	4:4,
+	layouts: 5,
+	$layouts: [{
+		name: 0,
+		width: 1,
+		height: 2,
+		unboundedScrolling: 3,
+		eventSheet: 4,
+		globalID: 5,
+		layers: 6,
+		$layers: [{
+			name: 0,
+			index: 1,
+			globalID: 2,
+			3:3,
+			backgroundColor: 4,
+			5:5,
+			paralaxX: 6,
+			paralaxY: 7,
+			8:8, 9:9, 10:10, 11:11, 12:12, 13:13,
+			objects: 14,
+			$objects: [{
+				generalProperties: 0,
+				$generalProperties: [{
+					x: 0,
+					y: 1,
+					2:2,
+					width: 3,
+					height: 4,
+					5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11,
+					effects: 12,
+				}],
+				objectType: 1,
+				UID: 2,
+				instanceVariables: 3,
+				$instanceVariables: [{
+					value: 0,
+				}],
+				4:4,
+				properties: 5,
+			}],
+			15:15,
+		}],
+		7:7,
+		8:8,
+	}],
+	eventSheets: 6,
+	media: 7,
+	mediaPath: 8,
+	9:9,
+	viewportWidth: 10,
+	viewportHeight: 11,
+	12:12, 13:13, 14:14, 15:15,
+	version: 16,
+	17:17, 18:18, 19:19, 20:20, 21:21, 22:22, 23:23, 24:24, 25:25,
+	projectName: 26,
+	27:27, 28:28
 }
 
 function verbosify(source, template, ignorenumbers=false) {
-    let ret = {}
-    for (const [k, v] of Object.entries(template)) {
+	let ret = {}
+	for (const [k, v] of Object.entries(template)) {
 		if (!ignorenumbers || k != parseInt(k)) {
-        	if (typeof v === "object" && typeof v != null) {
-            	if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
-            	const nk = k.replace("$","")
-            	if (Array.isArray(v)) {
-            	    ret[nk] = []
-            	    const sa = source[template[nk]]
-            	    for (let i = 0; i < sa.length; i++) {
-            	        ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
-            	    }
-            	} else {
-            	    ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
-            	}
-        	} else {
-            	if (typeof source[v] === "object") {
+			if (typeof v === "object" && typeof v != null) {
+				if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
+				const nk = k.replace("$","")
+                //console.log("DOING", nk)
+				if (Array.isArray(v)) {
+                    //console.log("LIST")
+					ret[nk] = []
+					const sa = source[template[nk]]
+                    const len = sa.length
+					for (let i = 0; i < len; i++) {
+                        //console.log("i",i)
+						ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
+					}
+				} else {
+                    //console.log("STRUCT")
+					ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
+				}
+			} else {
+				if (typeof source[v] === "object") {
 					Object.defineProperty(ret, k, {
-						writable: false,
-						enumerable: false,
+						writable: Object.hasOwn(template, "$"+k),
+						enumerable: Object.hasOwn(template, "$"+k),
 						value: source[v]
 					})
 				} else ret[k] = source[v]
-        	}
+			}
 		}
-    }
-    return ret
+	}
+	return ret
 }
 
 async function openDataFromURL(url, ignorenums=false) {
 	return new Promise(resolve => {
-		var xhttp = new XMLHttpRequest()
-		xhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				let data = JSON.parse(this.responseText)
-				resolve(verbosify(data.project, projectTemplate, ignorenums))
-			}
-		}
-		xhttp.open("GET", "./default-data.json", true)
-		xhttp.send()
+		fetch(url).then(res => res.json()).then(data => {
+            resolve(verbosify(data.project, projectTemplate, ignorenums))
+        })
 	})
 }
 
