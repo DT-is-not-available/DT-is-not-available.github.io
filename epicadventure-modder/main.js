@@ -14,12 +14,12 @@ let projectTemplate = {
         height: 2,
         unboundedScrolling: 3,
         eventSheet: 4,
-        UID: 5,
+        globalID: 5,
         layers: 6,
         $layers: [{
             name: 0,
             index: 1,
-            UID: 2,
+            globalID: 2,
             3:3,
             backgroundColor: 4,
             5:5,
@@ -27,10 +27,30 @@ let projectTemplate = {
             paralaxY: 7,
             8:8, 9:9, 10:10, 11:11, 12:12, 13:13,
             objects: 14,
-            effects: 15,
+            $objects: [{
+                generalProperties: 0,
+                $generalProperties: [{
+                    x: 0,
+                    y: 1,
+                    2:2,
+                    width: 3,
+                    height: 4,
+                    5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11,
+                    effects: 12,
+                }],
+                objectType: 1,
+                UID: 2,
+                instanceVariables: 3,
+                $instanceVariables: [{
+                    value: 0,
+                }],
+                4:4,
+                properties: 5,
+            }],
+            15:15,
         }],
         7:7,
-        effects: 8,
+        8:8,
     }],
     eventSheets: 6,
     media: 7,
@@ -45,9 +65,10 @@ let projectTemplate = {
     27:27, 28:28
 }
 
-function verbosify(source, template) {
+function verbosify(source, template, ignorenumbers=false) {
     let ret = {}
     for (const [k, v] of Object.entries(template)) {
+		if (ignorenumbers & k == parseInt(k)) continue
         if (typeof v === "object" && typeof v != null) {
             if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
             const nk = k.replace("$","")
@@ -55,10 +76,10 @@ function verbosify(source, template) {
                 ret[nk] = []
                 const sa = source[template[nk]]
                 for (let i = 0; i < sa.length; i++) {
-                    ret[nk].push(verbosify(sa[i], v[0]))
+                    ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
                 }
             } else {
-                ret[nk] = verbosify(source[template[nk]], v)
+                ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
             }
         } else {
             if (typeof source[v] === "object") {
