@@ -67,12 +67,24 @@ function verbosify(source, template) {
     return ret
 }
 
+async function openDataFromURL(url) { return new Promise(resolve => {
+	var xhttp = new XMLHttpRequest()
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			let data = JSON.parse(this.responseText)
+			resolve(verbosify(data.project, projectTemplate))
+		}
+	}
+	xhttp.open("GET", "./default-data.json", true)
+	xhttp.send()
+}}
+
 function load() {
 	var xhttp = new XMLHttpRequest()
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			data = JSON.parse(this.responseText)
-			verbosify(data.project, projectTemplate)
+			project = verbosify(data.project, projectTemplate)
 		}
 	}
 	xhttp.open("GET", "./default-data.json", true)
