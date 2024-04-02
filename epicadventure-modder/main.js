@@ -94,13 +94,13 @@ function verbosify(source, template, ignorenumbers=false) {
     return ret
 }
 
-async function openDataFromURL(url) {
+async function openDataFromURL(url, ignorenums=false) {
 	return new Promise(resolve => {
 		var xhttp = new XMLHttpRequest()
 		xhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
 				let data = JSON.parse(this.responseText)
-				resolve(verbosify(data.project, projectTemplate))
+				resolve(verbosify(data.project, projectTemplate, ignorenums))
 			}
 		}
 		xhttp.open("GET", "./default-data.json", true)
@@ -113,7 +113,7 @@ function load() {
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			data = JSON.parse(this.responseText)
-			project = verbosify(data.project, projectTemplate)
+			project = verbosify(data.project, projectTemplate, true)
 		}
 	}
 	xhttp.open("GET", "./default-data.json", true)
