@@ -1,8 +1,78 @@
+let data
+let project
+
+let projectTemplate = {
+    0:0,
+    startingLayout: 1,
+    2:2,
+    objects: 3,
+    4:4,
+    layouts: 5,
+    $layouts: [{
+        name: 0,
+        width: 1,
+        height: 2,
+        unboundedScrolling: 3,
+        eventSheet: 4,
+        UID: 5,
+        layers: 6,
+        $layers: [{
+            name: 0,
+            index: 1,
+            UID: 2,
+            3:3,
+            backgroundColor: 4,
+            5:5,
+            paralaxX: 6,
+            paralaxY: 7,
+            8:8, 9:9, 10:10, 11:11, 12:12, 13:13,
+            objects: 14,
+            effects: 15,
+        }],
+        7:7,
+        effects: 8,
+    }],
+    eventSheets: 6,
+    media: 7,
+    mediaPath: 8,
+    9:9,
+    viewportWidth: 10,
+    viewportHeight: 11,
+    12:12, 13:13, 14:14, 15:15,
+    version: 16,
+    17:17, 18:18, 19:19, 20:20, 21:21, 22:22, 23:23, 24:24, 25:25,
+    projectName: 26,
+    27:27, 28:28
+}
+
+function verbosify(source, template) {
+    let ret = {}
+    for (const [k, v] of Object.entries(template)) {
+        if (typeof v === "object" && typeof v != null) {
+            if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
+            const nk = k.replace("$","")
+            if (Array.isArray(v)) {
+                ret[nk] = []
+                const sa = source[template[nk]]
+                for (let i = 0; i < sa.length; i++) {
+                    ret[nk].push(verbosify(sa[i], v[0]))
+                }
+            } else {
+                ret[nk] = verbosify(source[template[nk]], v)
+            }
+        } else {
+            ret[k] = source[v]
+        }
+    }
+    return ret
+}
+
 function load() {
 	var xhttp = new XMLHttpRequest()
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 			data = JSON.parse(this.responseText)
+			verbosify(data.project, projectTemplate)
 		}
 	}
 	xhttp.open("GET", "./default-data.json", true)
