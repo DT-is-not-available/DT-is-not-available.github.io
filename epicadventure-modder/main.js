@@ -61,7 +61,13 @@ function verbosify(source, template) {
                 ret[nk] = verbosify(source[template[nk]], v)
             }
         } else {
-            ret[k] = source[v]
+            if (typeof source[v] === "object") {
+				Object.defineProperty(ret, k, {
+					writable: false,
+					enumerable: false,
+					value: source[v]
+				})
+			} else ret[k] = source[v]
         }
     }
     return ret
