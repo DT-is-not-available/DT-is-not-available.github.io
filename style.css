@@ -1,0 +1,47 @@
+html, #content {
+  height: 100%;
+  width: 100%;
+	background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red);
+	color: white;
+	font-family: cursive;
+	font-weight: bold;
+	font-size: 1.5em;
+}
+#square {
+	display: inline-block;
+	width: 64px;
+	height: 64px;
+	background: red;
+}
+#real {
+	background: white;
+	color: black;
+	font-family: system-ui;
+	font-weight: normal;
+	font-size: 16px;
+	padding: 20px;
+}
+#content {
+    background: url(https://i0.wp.com/www.learningtocookfood.com/wp-content/uploads/2016/01/FriedEggs-OilinPan.gif?resize=625%2C352);
+    background-size: 300px;
+    opacity: 1;
+    transform: rotate(-1deg) skewX(-5deg);
+	cursor: url(https://www.freeiconspng.com/thumbs/cursor-png/similar-icons-with-these-tags-cursor-mouse-select-click-8.png);
+}
+html {
+    background: linear-gradient(4deg, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red, red, orange, yellow, green, blue, indigo, violet, red);
+}
+
+html, #content {
+    height: 100%;
+    width: 100%;
+    color: yellow;
+    font-family: cursive;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+#cornerads {
+	position: fixed;
+	right: 0px;
+	top: 0px;
+}

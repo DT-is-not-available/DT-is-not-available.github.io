@@ -1,0 +1,50 @@
+<h1>Drawimage vs pattern</h1>
+<canvas width="1000" height="1000" id="c"></canvas>
+<img id="img" src="https://webdesign.thedt365.repl.co/freerobux.PNG">
+<script>
+	window.onload = ()=>{
+		let ctx = document.getElementById("c").getContext('2d')
+		window.img = document.getElementById("img")
+		img.remove()
+		function write(txt) {
+			let txte = document.createElement("pre")
+			txte.innerText = txt
+			document.body.appendChild(txte)
+		}
+		write("starting drawimage with no checks, 100x100 grid at "+Date.now())
+		let start = Date.now()
+		for (let i = 0; i < 100; i++) {
+			ctx.clearRect(0, 0, 1000, 1000)
+			for (let x = 0; x < 100; x++) {
+				for (let y = 0; y < 100; y++) {
+					ctx.drawImage(img, x*151, y*110)
+				}
+			}
+		}
+		write("100 attempts complete: took "+(Date.now()-start)+"ms")
+		write("starting pattern, 100x100 grid at "+Date.now())
+		start = Date.now()
+		for (let i = 0; i < 100; i++) {
+			ctx.clearRect(0, 0, 1000, 1000)
+			let pattern = ctx.createPattern(img, "repeat")
+			ctx.fillStyle = pattern
+			ctx.fillRect(-i, -i, 15100, 11000)
+		}
+		write("100 attempts complete: took "+(Date.now()-start)+"ms")
+		write("starting drawimage with offscreen checks, 100x100 grid at "+Date.now())
+		start = Date.now()
+		for (let i = 0; i < 100; i++) {
+			ctx.clearRect(0, 0, 1000, 1000)
+			for (let x = 0; x < 100; x++) {
+					if (x*151 > 1000)
+						break
+				for (let y = 0; y < 100; y++) {
+					if (y*110 > 1000)
+						break
+					ctx.drawImage(img, x*151, y*110)
+				}
+			}
+		}
+		write("100 attempts complete: took "+(Date.now()-start)+"ms")
+	}
+</script>
