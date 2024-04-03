@@ -1,53 +1,6 @@
 let data
 let project
 
-function eventListConstructor(el, i) {
-    switch(el[0]) {
-        case 0:
-            let ret = {
-                type: 0,
-                or: 2,
-                globalID: 4,
-                conditions: 5,
-                actions: 6,
-                $actions: [{
-                    objectType: 0,
-                    action: 1,
-                    globalID: 3,
-                    arguments: 5,
-                    $arguments: [{
-                        argument: 1,
-                        $argument: [{
-                            type: 0,
-                            value: 1,
-                        }],
-                    }],
-                }],
-                subEvents: 7,
-                $subEvents: [eventListConstructor],
-            }
-            return ret
-        case 1:
-            return {
-                type: 0,
-                variableName: 1,
-                isString: 2,
-                defaultValue: 3,
-                globalID: 6,
-            }
-        case 2:
-            return {
-                type: 0,
-				includedEventSheet: 1,
-            }
-        default:
-			console.log(el[0])
-            return {
-                type: 0
-            }
-    }
-}
-
 let projectTemplate = {
 	startingLayout: 1,
 	objects: 3,
@@ -103,18 +56,19 @@ let projectTemplate = {
 			index: 1,
 			globalID: 2,
 			backgroundColor: 4,
+			transparentBackground: 5,
 			paralaxX: 6,
 			paralaxY: 7,
 			objects: 14,
 			$objects: [{
 				generalProperties: 0,
-				$generalProperties: [{
+				$generalProperties: {
 					x: 0,
 					y: 1,
 					width: 3,
 					height: 4,
 					effects: 12,
-				}],
+				},
 				objectType: 1,
 				UID: 2,
 				instanceVariables: 3,
@@ -129,7 +83,33 @@ let projectTemplate = {
     $eventSheets: [{
         name: 0,
         events: 1,
-        $events: [eventListConstructor],
+        $events: [{
+			type: 0,
+			includedEventSheet: 1,
+			variableName: 1,
+			or: 2,
+			isString: 2,
+			defaultValue: 3,
+			globalID: 4,
+			conditions: 5,
+			actions: 6,
+			globalID: 6,
+			$actions: [{
+				objectType: 0,
+				action: 1,
+				globalID: 3,
+				arguments: 5,
+				$arguments: [{
+					argument: 1,
+					$argument: [{
+						type: 0,
+						value: 1,
+					}],
+				}],
+			}],
+			subEvents: 7,
+			$subEvents: [eventListConstructor],
+		}],
     }],
 	media: 7,
 	$media: [{
