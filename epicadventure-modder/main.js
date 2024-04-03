@@ -1,12 +1,94 @@
 let data
 let project
 
+function eventListConstructor(el, i) {
+    switch(el[0]) {
+        case 0:
+            let ret = {
+                type: 0,
+                or: 2,
+                globalID: 4,
+                conditions: 5,
+                actions: 6,
+                $actions: [{
+                    objectType: 0,
+                    action: 1,
+                    globalID: 3,
+                    arguments: 5,
+                    $arguments: [{
+                        argument: 1,
+                        $argument: [{
+                            type: 0,
+                            value: 1,
+                        }],
+                    }],
+                }],
+                subEvents: 7,
+                $subEvents: [eventListConstructor],
+            }
+            return ret
+        case 1:
+            return {
+                type: 0,
+                variableName: 1,
+                isString: 2,
+                defaultValue: 3,
+                globalID: 6,
+            }
+        case 2:
+            return {
+                type: 0,
+				includedEventSheet: 1,
+            }
+        default:
+			console.log(el[0])
+            return {
+                type: 0
+            }
+    }
+}
+
 let projectTemplate = {
-	0:0,
 	startingLayout: 1,
-	2:2,
 	objects: 3,
-	4:4,
+	$objects: [{
+		objectTypeString: 0,
+		pluginType: 1,
+		sprite: 6,
+		$sprite: [{
+			image: 0,
+		}],
+		animations: 7,
+		$animations: [{
+			name: 0,
+			speed: 1,
+			loop: 2,
+			pingPong: 5,
+			globalID: 6,
+			frames: 7,
+			$frames: [{
+				image: 0,
+				sourceX: 2,
+				sourceY: 3,
+				width: 4,
+				height: 5,
+				frameLength: 6,
+				collisionPoints: 10,
+			}],
+		}],
+		behaviors: 8,
+		$behaviors: [{
+			name: 0,
+			behaviorType: 1,
+			globalID: 2,
+		}],
+		globalID: 11,
+		effects: 12,
+		$effects: [{
+			effectType: 0,
+			name: 1,
+		}]
+	}],
 	layouts: 5,
 	$layouts: [{
 		name: 0,
@@ -20,22 +102,17 @@ let projectTemplate = {
 			name: 0,
 			index: 1,
 			globalID: 2,
-			3:3,
 			backgroundColor: 4,
-			5:5,
 			paralaxX: 6,
 			paralaxY: 7,
-			8:8, 9:9, 10:10, 11:11, 12:12, 13:13,
 			objects: 14,
 			$objects: [{
 				generalProperties: 0,
 				$generalProperties: [{
 					x: 0,
 					y: 1,
-					2:2,
 					width: 3,
 					height: 4,
-					5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11,
 					effects: 12,
 				}],
 				objectType: 1,
@@ -44,68 +121,163 @@ let projectTemplate = {
 				$instanceVariables: [{
 					value: 0,
 				}],
-				4:4,
 				properties: 5,
 			}],
-			15:15,
 		}],
-		7:7,
-		8:8,
 	}],
 	eventSheets: 6,
+    $eventSheets: [{
+        name: 0,
+        events: 1,
+        $events: [eventListConstructor],
+    }],
 	media: 7,
+	$media: [{
+		filename: 0,
+	}],
 	mediaPath: 8,
-	9:9,
 	viewportWidth: 10,
 	viewportHeight: 11,
-	12:12, 13:13, 14:14, 15:15,
 	version: 16,
-	17:17, 18:18, 19:19, 20:20, 21:21, 22:22, 23:23, 24:24, 25:25,
 	projectName: 26,
-	27:27, 28:28
 }
 
-function verbosify(source, template, ignorenumbers=false) {
+function verbosify(source, template, preserveUnused=false) {
+	let sourceKeys = {}
 	let ret = {}
 	for (const [k, v] of Object.entries(template)) {
-		if (!ignorenumbers || k != parseInt(k)) {
-			if (typeof v === "object" && typeof v != null) {
-				if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
-				const nk = k.replace("$","")
-                //console.log("DOING", nk)
-				if (Array.isArray(v)) {
-                    //console.log("LIST")
+		if (typeof v === "object" && v != null) {
+			if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
+			const nk = k.replace("$","")
+			//console.log("DOING", nk)
+			if (Array.isArray(v)) {
+				//console.log("LIST")
+				const sa = source[template[nk]]
+				if (Array.isArray(sa)) {
 					ret[nk] = []
-					const sa = source[template[nk]]
-                    const len = sa.length
+					const len = sa.length
 					for (let i = 0; i < len; i++) {
-                        //console.log("i",i)
-						ret[nk].push(verbosify(sa[i], v[0], ignorenumbers))
+						//console.log("i",i)
+						let cv = v[0]
+						if (typeof cv === "function") cv = cv(sa[i], i)
+						let fv = sa[i]
+						if (fv != null && typeof fv !== "undefined") fv = verbosify(sa[i], cv, preserveUnused)
+						ret[nk].push(fv)
 					}
 				} else {
-                    //console.log("STRUCT")
-					ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
+					if (typeof sa !== "undefined") ret[nk] = sa
 				}
+				sourceKeys[template[nk]] = true
 			} else {
-				if (typeof source[v] === "object") {
-					Object.defineProperty(ret, k, {
-						writable: Object.hasOwn(template, "$"+k),
-						enumerable: Object.hasOwn(template, "$"+k),
-						value: source[v]
-					})
-				} else ret[k] = source[v]
+				//console.log("STRUCT")
+				ret[nk] = verbosify(source[template[nk]], v, preserveUnused)
+				sourceKeys[template[nk]] = true
 			}
+		} else {
+			if (typeof source[v] !== "undefined") ret[k] = source[v]
+			sourceKeys[v] = true
+		}
+	}
+	if (preserveUnused) {
+		for (const k of Object.keys(source)) {
+			if (!sourceKeys[k]) Object.defineProperty(ret, k, {
+				writable: true,
+				enumerable: false,
+				value: source[k],
+			})
 		}
 	}
 	return ret
 }
 
-async function openDataFromURL(url, ignorenums=false) {
+function deverbosify(source, template) {
+	let ret = {}
+	for (const [k, v] of Object.entries(template)) {
+		if (typeof v === "object" && v != null) {
+			if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
+			const nk = k.replace("$","")
+			//console.log("DOING", nk)
+			if (Array.isArray(v)) {
+				//console.log("LIST")
+				const sa = source[template[nk]]
+				if (Array.isArray(sa)) {
+					ret[nk] = []
+					const len = sa.length
+					for (let i = 0; i < len; i++) {
+						//console.log("i",i)
+						let cv = v[0]
+						if (typeof cv === "function") cv = cv(sa[i], i)
+						let fv = sa[i]
+						if (fv != null && typeof fv !== "undefined") fv = verbosify(sa[i], cv, ignorenumbers)
+						ret[nk].push(fv)
+					}
+				} else {
+					if (typeof sa !== "undefined") ret[nk] = sa
+				}
+			} else {
+				//console.log("STRUCT")
+				ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
+			}
+		} else {
+			if (typeof source[v] !== "undefined") ret[k] = source[v]
+		}
+		if (ignorenumbers && k == parseInt(k)) {
+			Object.defineProperty(ret, k, {
+				writable: true,
+				enumerable: false,
+				value: ret[k]
+			})
+		}
+	}
+	return ret
+}
+
+async function openDataFromURL(url, preserveUnused=false) {
 	return new Promise(resolve => {
 		fetch(url).then(res => res.json()).then(data => {
-            resolve(verbosify(data.project, projectTemplate, ignorenums))
+            resolve(verbosify(data.project, projectTemplate, preserveUnused))
         })
 	})
+}
+
+function forceEntries(obj) {
+	const keys = Object.getOwnPropertyNames(obj)
+	const ret = []
+	for (let i = 0; i < keys.length; i++) {
+		ret.push([keys[i], obj[keys[i]]])
+	}
+	return ret
+}
+
+function searchV(obj, value, arrayform=false, path="") {
+    let results = []
+    for (const [k, v] of forceEntries(obj)) {
+        const np = (path+"/"+k)
+        if (typeof v === "object" && v != null) results.push(...searchV(v, value, arrayform, np))
+        if (v === value) {
+            if (arrayform) {
+                const a = np.split("/")
+                a.shift()
+                results.push({[a]:v})
+            } else results.push({[np]:v})
+        }
+    }
+    return results
+}
+function searchK(obj, value, arrayform=false, path="") {
+    let results = []
+    for (const [k, v] of forceEntries(obj)) {
+        const np = (path+"/"+k)
+        if (typeof v === "object" && v != null) results.push(...searchK(v, value, arrayform, np))
+        if (k === value) {
+            if (arrayform) {
+                const a = np.split("/")
+                a.shift()
+                results.push({[a]:v})
+            } else results.push({[np]:v})
+        }
+    }
+    return results
 }
 
 function load() {
