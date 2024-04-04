@@ -35,9 +35,9 @@ let projectTemplate = {
 		objectTypeString: 0,
 		pluginType: 1,
 		sprite: 6,
-		$sprite: [{
+		$sprite: {
 			image: 0,
-		}],
+		},
 		animations: 7,
 		$animations: [{
 			name: 0,
