@@ -132,6 +132,10 @@ function type(v) {
 }
 
 function verbosify(source, template, preserveUnused=true) {
+	if (source == null) {
+		console.warn("null found")
+		return null
+	}
 	let sourceKeys = {}
 	let ret = {}
 	for (const [k, v] of Object.entries(template)) {
@@ -179,6 +183,10 @@ function verbosify(source, template, preserveUnused=true) {
 }
 
 function deverbosify(source, template) {
+	if (source == null) {
+		console.warn("null found")
+		return null
+	}
 	let ret = {}
 	let sourceKeys = {}
 	let isArray = true
