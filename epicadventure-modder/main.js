@@ -33,6 +33,7 @@ eventListConstructor.push({
 
 let projectTemplate = {
 	startingLayout: 1,
+	pluginConfig: 2,
 	objects: 3,
 	$objects: [{
 		objectTypeString: 0,
@@ -122,7 +123,9 @@ let projectTemplate = {
 	mediaPath: 8,
 	viewportWidth: 10,
 	viewportHeight: 11,
+	fullscreenScaling: 12,
 	version: 16,
+	loadingScreen: 19,
 	projectName: 26,
 }
 
