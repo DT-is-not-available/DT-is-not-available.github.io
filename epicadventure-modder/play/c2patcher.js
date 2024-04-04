@@ -122,7 +122,7 @@ void async function(self) {
     // hide config screen
     textscreen.remove()
 
-    script.addEventListener("load", function() {
+    requestAnimationFrame(function() {
         c2_createRuntime("c2canvas")
     })
 
