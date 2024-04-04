@@ -377,6 +377,6 @@ function load() {
 	})
 }
 function playMod() {
-	document.getElementById("result").innerText = JSON.stringify(deverbosify(project), projectTemplate)
+	document.getElementById("result").innerText = JSON.stringify(deverbosify(project, projectTemplate))
 }
 window.onload = load
