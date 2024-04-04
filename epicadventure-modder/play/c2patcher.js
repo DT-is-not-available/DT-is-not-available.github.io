@@ -131,9 +131,12 @@ void async function(self) {
     // hide config screen
     textscreen.remove()
 
-    await waitFor(()=>Object.hasOwnProperty(window, "c2_createRuntime"), 100)
-    
-    c2_createRuntime("c2canvas")
+    // await waitFor(()=>Object.hasOwnProperty(window, "cr_createRuntime"), 100)
+
+    // fuck off
+    // cr_createRuntime("c2canvas")
+
+    requestAnimationFrame(()=>cr_createRuntime("c2canvas"))
 
     self.remove()
 
