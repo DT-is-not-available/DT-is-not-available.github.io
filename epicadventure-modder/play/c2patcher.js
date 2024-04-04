@@ -5,6 +5,15 @@ void async function(self) {
             setTimeout(resolve, s*1000)
         })
     }
+    
+    async function waitFor(cond, timeout) {
+        return new Promise(resolve => {
+            let i
+            i = setInterval(()=>{
+                if (cond()) resolve(clearInterval(i))
+            }, timeout)
+        })
+    }
 
     // config screen
     const textscreen = document.createElement("pre")
@@ -122,9 +131,9 @@ void async function(self) {
     // hide config screen
     textscreen.remove()
 
-    requestAnimationFrame(function() {
-        c2_createRuntime("c2canvas")
-    })
+    await waitFor(()=>Object.hasOwnProperty(window, "c2_createRuntime"), 100)
+    
+    c2_createRuntime("c2canvas")
 
     self.remove()
 
