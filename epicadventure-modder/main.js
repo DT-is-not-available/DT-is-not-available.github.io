@@ -1,6 +1,36 @@
 let data
 let project
 
+let eventListConstructor = []
+
+eventListConstructor.push({
+	type: 0,
+	includedEventSheet: 1,
+	variableName: 1,
+	or: 2,
+	isString: 2,
+	defaultValue: 3,
+	globalID: 4,
+	conditions: 5,
+	actions: 6,
+	globalID: 6,
+	$actions: [{
+		objectType: 0,
+		action: 1,
+		globalID: 3,
+		arguments: 5,
+		$arguments: [{
+			argument: 1,
+			$argument: [{
+				type: 0,
+				value: 1,
+			}],
+		}],
+	}],
+	subEvents: 7,
+	$subEvents: eventListConstructor,
+})
+
 let projectTemplate = {
 	startingLayout: 1,
 	objects: 3,
@@ -83,33 +113,7 @@ let projectTemplate = {
     $eventSheets: [{
         name: 0,
         events: 1,
-        $events: [{
-			type: 0,
-			includedEventSheet: 1,
-			variableName: 1,
-			or: 2,
-			isString: 2,
-			defaultValue: 3,
-			globalID: 4,
-			conditions: 5,
-			actions: 6,
-			globalID: 6,
-			$actions: [{
-				objectType: 0,
-				action: 1,
-				globalID: 3,
-				arguments: 5,
-				$arguments: [{
-					argument: 1,
-					$argument: [{
-						type: 0,
-						value: 1,
-					}],
-				}],
-			}],
-			subEvents: 7,
-			$subEvents: [eventListConstructor],
-		}],
+        $events: eventListConstructor,
     }],
 	media: 7,
 	$media: [{
@@ -122,24 +126,29 @@ let projectTemplate = {
 	projectName: 26,
 }
 
-function verbosify(source, template, preserveUnused=false) {
+function type(v) {
+	if (Array.isArray(v)) return "array"
+	if (v == null) return "null"
+	return typeof v
+}
+
+function verbosify(source, template, preserveUnused=true) {
 	let sourceKeys = {}
 	let ret = {}
 	for (const [k, v] of Object.entries(template)) {
-		if (typeof v === "object" && v != null) {
+		if (type(v) == "object" || type(v) == "array") {
 			if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
 			const nk = k.replace("$","")
 			//console.log("DOING", nk)
-			if (Array.isArray(v)) {
+			if (type(v) == "array") {
 				//console.log("LIST")
 				const sa = source[template[nk]]
-				if (Array.isArray(sa)) {
+				if (type(sa) == "array") {
 					ret[nk] = []
 					const len = sa.length
 					for (let i = 0; i < len; i++) {
 						//console.log("i",i)
 						let cv = v[0]
-						if (typeof cv === "function") cv = cv(sa[i], i)
 						let fv = sa[i]
 						if (fv != null && typeof fv !== "undefined") fv = verbosify(sa[i], cv, preserveUnused)
 						ret[nk].push(fv)
@@ -172,41 +181,52 @@ function verbosify(source, template, preserveUnused=false) {
 
 function deverbosify(source, template) {
 	let ret = {}
+	let sourceKeys = {}
+	let isArray = true
 	for (const [k, v] of Object.entries(template)) {
 		if (typeof v === "object" && v != null) {
 			if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
 			const nk = k.replace("$","")
+			const id = template[nk]
 			//console.log("DOING", nk)
 			if (Array.isArray(v)) {
 				//console.log("LIST")
-				const sa = source[template[nk]]
-				if (Array.isArray(sa)) {
-					ret[nk] = []
+				const sa = source[nk]
+				if (type(sa) === "array") {
+					ret[id] = []
 					const len = sa.length
 					for (let i = 0; i < len; i++) {
 						//console.log("i",i)
 						let cv = v[0]
-						if (typeof cv === "function") cv = cv(sa[i], i)
 						let fv = sa[i]
-						if (fv != null && typeof fv !== "undefined") fv = verbosify(sa[i], cv, ignorenumbers)
-						ret[nk].push(fv)
+						if (fv != null && typeof fv !== "undefined") fv = deverbosify(fv, cv)
+						ret[id].push(fv)
 					}
 				} else {
-					if (typeof sa !== "undefined") ret[nk] = sa
+					if (typeof sa !== "undefined") ret[id] = sa
 				}
+				sourceKeys[k] = true
 			} else {
 				//console.log("STRUCT")
-				ret[nk] = verbosify(source[template[nk]], v, ignorenumbers)
+				ret[id] = deverbosify(source[nk], v)
+				sourceKeys[k] = true
 			}
 		} else {
-			if (typeof source[v] !== "undefined") ret[k] = source[v]
+			if (typeof source[k] !== "undefined") ret[v] = source[k]
+			sourceKeys[k] = true
+			if (typeof v !== "number") isArray = false
 		}
-		if (ignorenumbers && k == parseInt(k)) {
-			Object.defineProperty(ret, k, {
-				writable: true,
-				enumerable: false,
-				value: ret[k]
-			})
+	}
+	for (const [k, v] of forceEntries(source)) {
+		if (!sourceKeys[k]) {
+			ret[k] = v
+		}
+	}
+	if (isArray) {
+		let obj = ret
+		ret = []
+		for (const [k, v] of Object.entries(obj)) {
+			ret[k] = v
 		}
 	}
 	return ret
