@@ -342,38 +342,37 @@ function load() {
 	shop1 = document.getElementById("shop1")
 	shop1.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[4].layers[0].objects[5].instanceVariables[0][0] = shop1.value.replace(/\n/g, ";");
+		project.layouts[4].layers[0].objects[5].instanceVariables[0][0] = shop1.value.replace(/\n/g, ";");
 	})
 	
 	shop1talk = document.getElementById("shop1talk")
 	shop1talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[4].layers[0].objects[4].instanceVariables[0][0] = shop1talk.value
-		Result.innerHTML = JSON.stringify(data)
+		project.layouts[4].layers[0].objects[4].instanceVariables[0][0] = shop1talk.value
 	})
 	
 	shop2 = document.getElementById("shop2")
 	shop2.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[5].layers[0].objects[5].instanceVariables[0][0] = shop2.value.replace(/\n/g, ";");
+		project.layouts[5].layers[0].objects[5].instanceVariables[0][0] = shop2.value.replace(/\n/g, ";");
 	})
 	
 	shop2talk = document.getElementById("shop2talk")
 	shop2talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[5].layers[0].objects[4].instanceVariables[0][0] = shop2talk.value
+		project.layouts[5].layers[0].objects[4].instanceVariables[0][0] = shop2talk.value
 	})
 	
 	shop3 = document.getElementById("shop3")
 	shop3.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[6].layers[0].objects[5].instanceVariables[0] = shop3.value.replace(/\n/g, ";");
+		project.layouts[6].layers[0].objects[5].instanceVariables[0] = shop3.value.replace(/\n/g, ";");
 	})
 	
 	shop3talk = document.getElementById("shop3talk")
 	shop3talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		data.project.layouts[6].layers[0].objects[4].instanceVariables[0] = shop3talk.value
+		project.layouts[6].layers[0].objects[4].instanceVariables[0] = shop3talk.value
 	})
 }
 function playMod() {
