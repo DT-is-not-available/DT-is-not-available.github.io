@@ -13,7 +13,7 @@ eventListConstructor.push({
 	globalID: 4,
 	conditions: 5,
 	actions: 6,
-	globalID: 6,
+	var_globalID: 6,
 	$actions: [{
 		objectType: 0,
 		action: 1,
@@ -21,10 +21,6 @@ eventListConstructor.push({
 		arguments: 5,
 		$arguments: [{
 			argument: 1,
-			$argument: [{
-				type: 0,
-				value: 1,
-			}],
 		}],
 	}],
 	subEvents: 7,
