@@ -1,73 +1,139 @@
 let data
 let project
 
-let eventListConstructor = []
+let events = []
 
-eventListConstructor.push({
+events.push({ // todo: the fuck is going on here
 	type: 0,
 	includedEventSheet: 1,
 	variableName: 1,
 	or: 2,
 	isString: 2,
 	defaultValue: 3,
-	globalID: 4,
+	SID: 4,
 	conditions: 5,
 	actions: 6,
-	var_globalID: 6,
+	var_SID: 6,
 	$actions: [{
 		objectType: 0,
 		action: 1,
-		globalID: 3,
+		SID: 3,
 		arguments: 5,
 		$arguments: [{
 			argument: 1,
 		}],
 	}],
 	subEvents: 7,
-	$subEvents: eventListConstructor,
+	$subEvents: events,
 })
 
+const effect = {
+	id: 0,
+	name: 1,
+	params: 2,
+}
+
+const instance = {
+	commonProperties: 0,
+	$commonProperties: {
+		x: 0,
+		y: 1,
+		z: 2,
+		width: 3,
+		height: 4,
+		depth: 5,
+		angle: 6,
+		opacity: 7,
+		hotspotX: 8,
+		hotspotY: 9,
+		blendMode: 10,
+		effectFallback: 11,
+		effects: 12,
+		$effects: [effect],
+	},
+	objectType: 1,
+	UID: 2,
+	instanceVariables: 3,
+	$instanceVariables: [{
+		value: 0,
+		name: 1,
+	}],
+	behaviorProperties: 4,
+	pluginProperties: 5,
+}
+
 let projectTemplate = {
+	name: 0,
 	startingLayout: 1,
-	pluginConfig: 2,
+	plugins: 2,
+	$plugins: [{
+		id: 0,
+		singleGlobal: 1,
+		isWorld: 2,
+		canPosition: 3,
+		canResize: 4,
+		canRotate: 5,
+		hasAppearance: 6,
+		hasZOrder: 7,
+		hasEffects: 8,
+		mustPredraw: 9,
+	}],
 	objects: 3,
 	$objects: [{
-		objectTypeString: 0,
-		pluginType: 1,
-		sprite: 6,
-		$sprite: {
-			image: 0,
+		name: 0,
+		plugin: 1,
+		isFamily: 2,
+		instanceVarSIDs: 3,
+		behaviorCount: 4,
+		effectCount: 5,
+		texture: 6,
+		$texture: {
+			textureUrl: 0,
+			textureFilesize: 1,
+			pixelFormat: 2,
 		},
 		animations: 7,
 		$animations: [{
 			name: 0,
 			speed: 1,
 			loop: 2,
+			repeatCount: 3,
+			repeatTo: 4,
 			pingPong: 5,
-			globalID: 6,
+			SID: 6,
 			frames: 7,
 			$frames: [{
-				image: 0,
+				textureUrl: 0,
+				textureFilesize: 1,
 				sourceX: 2,
 				sourceY: 3,
 				width: 4,
 				height: 5,
 				frameLength: 6,
+				hotspotX: 7,
+				hotspotY: 8,
+				imagePoints: 9,
 				collisionPoints: 10,
+				pixelFormat: 11,
 			}],
 		}],
 		behaviors: 8,
 		$behaviors: [{
 			name: 0,
 			behaviorType: 1,
-			globalID: 2,
+			SID: 2,
 		}],
-		globalID: 11,
+		isGlobal: 9,
+		isOnLoaderLayout: 10,
+		SID: 11,
 		effects: 12,
-		$effects: [{
-			effectType: 0,
-			name: 1,
-		}]
+		$effects: [effect],
+		tilePolyData: 13,
+
+	}],
+	families: 4,
+	$families: [{
+		familyType: 0,
 	}],
 	layouts: 5,
 	$layouts: [{
@@ -76,53 +142,66 @@ let projectTemplate = {
 		height: 2,
 		unboundedScrolling: 3,
 		eventSheet: 4,
-		globalID: 5,
+		SID: 5,
 		layers: 6,
 		$layers: [{
 			name: 0,
 			index: 1,
-			globalID: 2,
+			SID: 2,
+			visible: 3,
 			backgroundColor: 4,
 			transparentBackground: 5,
 			paralaxX: 6,
 			paralaxY: 7,
-			objects: 14,
-			$objects: [{
-				generalProperties: 0,
-				$generalProperties: {
-					x: 0,
-					y: 1,
-					width: 3,
-					height: 4,
-					effects: 12,
-				},
-				objectType: 1,
-				UID: 2,
-				instanceVariables: 3,
-				$instanceVariables: [{
-					value: 0,
-				}],
-				properties: 5,
-			}],
+			opacity: 8,
+			forceOwnTexture: 9,
+			useRenderCells: 10,
+			zoomRate: 11,
+			blendMode: 12,
+			effectFallback: 13,
+			instances: 14,
+			$instances: [instance],
+			effects: 15,
+			$effects: [effect],
 		}],
+		nonworldInstances: 7,
+		$nonworldInstanes: [instance],
+		effects: 8,
+		$effects: [effect],
+
 	}],
 	eventSheets: 6,
     $eventSheets: [{
         name: 0,
         events: 1,
-        $events: eventListConstructor,
+        $events: events,
     }],
-	media: 7,
-	$media: [{
+	soundsToPreload: 7,
+	$soundsToPreload: [{
 		filename: 0,
+		halfSize: 1,
 	}],
 	mediaPath: 8,
+	pixelRounding: 9,
 	viewportWidth: 10,
 	viewportHeight: 11,
 	fullscreenScaling: 12,
+	enableWebGL: 13,
+	linearSampling: 14,
+	clearBackground: 15,
 	version: 16,
-	loadingScreen: 19,
+	useHighDpi: 17,
+	usesLoaderLayout: 18,
+	loaderStyle: 19,
+	orientation: 20,
+	nextUID: 21,
+	pauseOnBlur: 22,
+	highQualityFullscreenScaling: 23,
+	downscalingQuality: 24,
+	preloadSounds: 25,
 	projectName: 26,
+	frontToBackRenderer: 27,
+	containers: 28,
 }
 
 function type(v) {
@@ -131,13 +210,12 @@ function type(v) {
 	return typeof v
 }
 
-function verbosify(source, template, preserveUnused=true) {
+function verbosify(source, template, preserveUnused=true, ret={}) {
 	if (source == null) {
 		console.warn("null found")
 		return null
 	}
 	let sourceKeys = {}
-	let ret = {}
 	for (const [k, v] of Object.entries(template)) {
 		if (type(v) == "object" || type(v) == "array") {
 			if (k[0] != "$") throw TypeError("Only $ properties can use sub-templates")
@@ -225,7 +303,7 @@ function deverbosify(source, template) {
 		}
 	}
 	for (const [k, v] of forceEntries(source)) {
-		if (!sourceKeys[k]) {
+		if (!sourceKeys[k] && typeof v !== "function") {
 			ret[k] = v
 		}
 	}
@@ -303,26 +381,26 @@ function load() {
 	gameTitle = document.getElementById("gameTitle")
 	gameTitle.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[1].layers[1].objects[0].instanceVariables[0][0] = gameTitle.value.toUpperCase()
-		project.layouts[1].layers[1].objects[1].instanceVariables[0][0] = gameTitle.value
+		project.layouts[1].layers[1].instances[0].instanceVariables[0][0] = gameTitle.value.toUpperCase()
+		project.layouts[1].layers[1].instances[1].instanceVariables[0][0] = gameTitle.value
 	})
 	
 	gameTitleAbove = document.getElementById("gameTitleAbove")
 	gameTitleAbove.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[1].layers[1].objects[2].properties[3] = gameTitleAbove.value
+		project.layouts[1].layers[1].instances[2].pluginProperties[3] = gameTitleAbove.value
 	})
 	
 	gameTitleBelow = document.getElementById("gameTitleBelow")
 	gameTitleBelow.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[1].layers[1].objects[4].properties[3] = gameTitleBelow.value
+		project.layouts[1].layers[1].instances[4].pluginProperties[3] = gameTitleBelow.value
 	})
 	
 	gameTitleBelow = document.getElementById("gameTitleBelowShadow")
 	gameTitleBelow.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[1].layers[1].objects[3].properties[3] = gameTitleBelow.value
+		project.layouts[1].layers[1].instances[3].pluginProperties[3] = gameTitleBelow.value
 	})
 	
 	startingLayout = document.getElementById("Starting Layout")
@@ -346,37 +424,37 @@ function load() {
 	shop1 = document.getElementById("shop1")
 	shop1.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[4].layers[0].objects[5].instanceVariables[0][0] = shop1.value.replace(/\n/g, ";");
+		project.layouts[4].layers[0].instances[5].instanceVariables[0][0] = shop1.value.replace(/\n/g, ";");
 	})
 	
 	shop1talk = document.getElementById("shop1talk")
 	shop1talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[4].layers[0].objects[4].instanceVariables[0][0] = shop1talk.value
+		project.layouts[4].layers[0].instances[4].instanceVariables[0][0] = shop1talk.value
 	})
 	
 	shop2 = document.getElementById("shop2")
 	shop2.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[5].layers[0].objects[5].instanceVariables[0][0] = shop2.value.replace(/\n/g, ";");
+		project.layouts[5].layers[0].instances[5].instanceVariables[0][0] = shop2.value.replace(/\n/g, ";");
 	})
 	
 	shop2talk = document.getElementById("shop2talk")
 	shop2talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[5].layers[0].objects[4].instanceVariables[0][0] = shop2talk.value
+		project.layouts[5].layers[0].instances[4].instanceVariables[0][0] = shop2talk.value
 	})
 	
 	shop3 = document.getElementById("shop3")
 	shop3.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[6].layers[0].objects[5].instanceVariables[0] = shop3.value.replace(/\n/g, ";");
+		project.layouts[6].layers[0].instances[5].instanceVariables[0] = shop3.value.replace(/\n/g, ";");
 	})
 	
 	shop3talk = document.getElementById("shop3talk")
 	shop3talk.addEventListener('change', function(){
 		document.getElementById("result").innerText = "please recompile"
-		project.layouts[6].layers[0].objects[4].instanceVariables[0] = shop3talk.value
+		project.layouts[6].layers[0].instances[4].instanceVariables[0] = shop3talk.value
 	})
 }
 function playMod() {
