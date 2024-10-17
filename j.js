@@ -1,5 +1,3 @@
-location.href = "https://insert.games/its-time-to-start-over"
-
 go = _=>setTimeout(()=>{
 	makeText("It's time to start over.")
 	go()
